@@ -310,7 +310,7 @@ footer small{display:block;margin-top:26px;font-size:13px;color:var(--muted)}
     <div>
       <h2>Giveaway</h2>
       <p class="lead">Leave one of your photos and your Instagram name. I draw one entry and repost it on Allllleria with a dedication.</p>
-      <span class="label trial">Opening soon</span>
+      
     </div>
     <form class="raffle" id="raffle" novalidate>
       <div class="field">
@@ -410,7 +410,7 @@ footer small{display:block;margin-top:26px;font-size:13px;color:var(--muted)}
     <h2>4. Chi vede i tuoi dati</h2>
     <ul>
       <li><strong>Matteo Venanzio</strong>, titolare del trattamento.</li>
-      <li><strong>Il fornitore di hosting del sito</strong> (GitHub, Inc., servizio GitHub Pages), che tratta i dati per conto del titolare come responsabile del trattamento (art. 28 GDPR).</li>
+      <li><strong>I fornitori di hosting e del database del sito</strong>: GitHub, Inc. (servizio GitHub Pages) per le pagine del sito e Supabase, Inc. (server nell'Unione europea, in Irlanda) per la classifica e le foto del sorteggio. Trattano i dati per conto del titolare come responsabili del trattamento (art. 28 GDPR).</li>
       <li><strong>Instagram</strong> (Meta Platforms Ireland Ltd.), solo per la foto estratta nel sorteggio. Una volta pubblicata su Instagram, la foto è soggetta anche all'informativa di Meta.</li>
       <li><strong>Tutti i visitatori</strong>, solo per nome o nickname e punteggio in classifica.</li>
     </ul>
@@ -468,6 +468,7 @@ footer small{display:block;margin-top:26px;font-size:13px;color:var(--muted)}
         <tbody>
           <tr><td><code>allllleria-entered</code></td><td>sessionStorage</td><td>Ricorda che hai già superato il gioco d'ingresso, così non devi rigiocare mentre navighi.</td><td>Si cancella quando chiudi la scheda.</td></tr>
           <tr><td><code>allllleria-leaderboard</code></td><td>localStorage</td><td>Salva la classifica su questo dispositivo quando la classifica condivisa non è disponibile.</td><td>Finché non cancelli i dati del sito dal browser.</td></tr>
+          <tr><td><code>allllleria-device</code></td><td>localStorage</td><td>Un codice casuale che collega il tuo punteggio a questo dispositivo, così in classifica resta solo il tuo record. Non contiene dati personali e non serve a riconoscerti.</td><td>Finché non cancelli i dati del sito dal browser.</td></tr>
         </tbody>
       </table>
     </div>
@@ -647,6 +648,23 @@ $("mark").addEventListener("click", () => { if (location.hash && location.hash !
 /* ---------- Leaderboard ---------- */
 const LB_KEY = "allllleria-leaderboard";
 let scores = [], lbMode = "local", db = null, uid = null;
+/* Shared leaderboard and giveaway on Supabase (only on the public site; null in the Claude test version) */
+const SUPA = {url: "https://dlkwcclmvoqhlacrwejh.supabase.co", key: "sb_publishable_MrpdJXrYZHQ_BZbaSfhiQQ_PQCvfkaD"};
+function supa(path, body, headers) {
+  const opt = {method: "POST", headers: Object.assign({apikey: SUPA.key}, headers || {"Content-Type": "application/json"})};
+  if (body !== undefined) opt.body = body instanceof Blob ? body : JSON.stringify(body);
+  return fetch(SUPA.url + path, opt).then(async r => { const t = await r.text(); if (!r.ok) throw new Error(r.status + " " + t); return t ? JSON.parse(t) : null; });
+}
+function uuid() { if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16)); b[6] = b[6] & 15 | 64; b[8] = b[8] & 63 | 128;
+  const h = [...b].map(x => x.toString(16).padStart(2, "0")).join(""); return h.slice(0,8)+"-"+h.slice(8,12)+"-"+h.slice(12,16)+"-"+h.slice(16,20)+"-"+h.slice(20); }
+function deviceId() { let id = null; try { id = localStorage.getItem("allllleria-device"); } catch(e) {}
+  if (!id) { id = uuid(); try { localStorage.setItem("allllleria-device", id); } catch(e) {} } return id; }
+async function loadShared() {
+  const rows = await supa("/rest/v1/rpc/top_scores", {});
+  scores = (rows || []).map(x => ({name: String(x.name).slice(0, 24), score: x.score})); renderScores();
+  $("board-note").textContent = "Shared by everyone who plays. One score per device: your best one stays.";
+}
 function renderScores() {
   const board = $("board"), mini = $("mini"); board.textContent = ""; mini.textContent = "";
   if (!scores.length) { const li = el("li"); li.style.display = "block"; li.append(el("span", "empty", "No scores yet. First place is open.")); board.append(li);
@@ -655,9 +673,12 @@ function renderScores() {
   scores.slice(0, 3).forEach(s => { const li = el("li"); li.append(el("span", null, s.name), el("span", null, String(s.score))); mini.append(li); });
 }
 function loadLocal() { try { scores = JSON.parse(localStorage.getItem(LB_KEY) || "[]"); } catch(e) { scores = []; }
-  $("board-note").textContent = "For now this leaderboard is saved on this device only. A shared one is coming soon."; renderScores(); }
+  $("board-note").textContent = "Test version: this leaderboard is saved on this device only."; renderScores(); }
 async function initBoard() {
   loadLocal();
+  if (SUPA) { lbMode = "supa"; $("board-note").textContent = "Loading the leaderboard…";
+    try { await loadShared(); } catch(e) { lbMode = "local"; loadLocal(); }
+    return; }
   try {
     const c = window.claude; if (!c || !c.use) return;
     const [d, u] = await Promise.all([c.use("db"), c.use("user")]); if (!d) return;
@@ -672,6 +693,11 @@ async function initBoard() {
   } catch(e) { lbMode = "local"; }
 }
 async function saveScore(name, score) {
+  if (lbMode === "supa") {
+    await supa("/rest/v1/rpc/submit_score", {p_device: deviceId(), p_name: name.slice(0, 20), p_score: score});
+    try { await loadShared(); } catch(e) {}
+    return "Saved. Your best score on this device stays on the leaderboard.";
+  }
   if (lbMode === "shared" && db && uid) {
     const ref = db.doc("scores/" + uid), old = await ref.get();
     if (old.exists && (old.data().score || 0) >= score) { await ref.update({name}); return "Your record is still " + old.data().score + ". Name updated."; }
@@ -977,11 +1003,28 @@ $("btn-play").addEventListener("click", openGate);
 let blobUrl = null;
 $("foto").addEventListener("change", () => { const f = $("foto").files[0], p = $("preview"); if (blobUrl) URL.revokeObjectURL(blobUrl);
   if (f && f.type.startsWith("image/")) { blobUrl = URL.createObjectURL(f); p.src = blobUrl; p.hidden = false; } else { p.hidden = true; } });
-$("raffle").addEventListener("submit", e => { e.preventDefault(); const msg = $("raffle-msg"), ig = $("ig").value.trim().replace(/^@/, "");
+function shrink(file) { return new Promise((ok, ko) => { const im = new Image(), u = URL.createObjectURL(file);
+  im.onload = () => { const k = Math.min(1, 2000 / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement("canvas");
+    c.width = Math.round(im.naturalWidth * k); c.height = Math.round(im.naturalHeight * k);
+    const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+    URL.revokeObjectURL(u); c.toBlob(b => b ? ok(b) : ko(new Error("encode")), "image/jpeg", 0.86); };
+  im.onerror = () => { URL.revokeObjectURL(u); ko(new Error("decode")); }; im.src = u; }); }
+let sending = false;
+$("raffle").addEventListener("submit", async e => { e.preventDefault(); const msg = $("raffle-msg"), ig = $("ig").value.trim().replace(/^@/, "");
   if (!$("foto").files[0]) { msg.textContent = "The photo is missing: choose one."; return; }
   if (!/^[A-Za-z0-9._]{1,30}$/.test(ig)) { msg.textContent = "Check your Instagram name: letters, numbers, dots and underscores only."; return; }
   if (!$("consenso").checked) { msg.textContent = "To enter, tick the box that allows the repost."; return; }
-  msg.textContent = "All good, @" + ig + ". Entries are not open yet, so your photo was not sent. Follow @allllleria on Instagram to know when they start."; });
+  if (!SUPA) { msg.textContent = "All good, @" + ig + ". This is a test: your photo was not sent. Real entries open with the final site."; return; }
+  if (sending) return; sending = true; const btn = $("raffle").querySelector("button"); btn.disabled = true; msg.textContent = "Sending your photo…";
+  try {
+    let blob; try { blob = await shrink($("foto").files[0]); } catch(err) { msg.textContent = "This photo format cannot be read here. Try a JPG or PNG."; return; }
+    const path = "entries/" + uuid() + ".jpg";
+    await supa("/storage/v1/object/giveaway/" + path, blob, {"Content-Type": "image/jpeg", "x-upsert": "false"});
+    await supa("/rest/v1/giveaway_entries", {instagram: ig, photo_path: path, consent: true}, {"Content-Type": "application/json", Prefer: "return=minimal"});
+    msg.textContent = "You are in, @" + ig + ". Good luck: the winner gets reposted on Allllleria with a dedication.";
+    $("raffle").reset(); $("preview").hidden = true;
+  } catch(err) { msg.textContent = "Your entry could not be sent. Try again in a moment."; }
+  finally { sending = false; btn.disabled = false; } });
 
 /* ---------- The Ls ---------- */
 let elle = 5;
