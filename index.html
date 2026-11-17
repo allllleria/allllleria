@@ -989,7 +989,8 @@ $("score-form").addEventListener("submit", async e => {
   if (!name) { $("save-note").textContent = "Type a name or nickname to join the leaderboard."; $("nick").focus(); return; }
   $("btn-save").disabled = true;
   try { $("save-note").textContent = (await saveScore(name, best)) + " Play again to improve it."; $("score-form").hidden = true; $("btn-retry").focus({preventScroll: true}); }
-  catch(err) { $("save-note").textContent = "The score could not be saved. Try again in a moment."; }
+  catch(err) { if (String(err && err.message).includes("name_not_allowed")) { $("save-note").textContent = "This name is not allowed. Choose another one."; $("nick").select(); }
+    else $("save-note").textContent = "The score could not be saved. Try again in a moment."; }
   $("btn-save").disabled = false;
 });
 function enter() { document.documentElement.classList.remove("playing"); setHell(false); cancelAnimationFrame(raf); if (st.mode === "run") st.mode = "ready"; document.documentElement.classList.add("entered"); store.set("allllleria-entered", "1"); route(); }
