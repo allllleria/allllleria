@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Allllleria</title>
+<style>
+@font-face{font-family:"Bodoni Moda";src:url("fonts/BodoniModa.ttf") format("truetype");font-weight:400 900;font-display:swap}
+:root{
+  /* Layout: white paper, full-bleed photographs, fixed logo box top-left; one accent, tomato red. */
+  --paper:#ffffff;
+  --ink:#16130f;
+  --muted:#6d675f;
+  --line:#e6e1d9;
+  --pomodoro:#d9351c;
+  --basilico:#2f6b3a;
+  --pitch:#ffffff;
+  --display:"Bodoni Moda","Bodoni 72",Didot,"Times New Roman",serif;
+  --gutter:16px;
+  color-scheme:light;
+  --pizza:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23e2a857' stroke='%2316130f' stroke-width='1.5'/%3E%3Ccircle cx='16' cy='16' r='10.5' fill='%23d9351c'/%3E%3Ccircle cx='12' cy='12' r='2.6' fill='%23fff'/%3E%3Ccircle cx='20.5' cy='14' r='2.4' fill='%23fff'/%3E%3Ccircle cx='14' cy='20.5' r='2.6' fill='%23fff'/%3E%3Cellipse cx='19.5' cy='20.5' rx='2.4' ry='1.3' fill='%232f6b3a' transform='rotate(-30 19.5 20.5)'/%3E%3Cellipse cx='16.5' cy='9' rx='2.2' ry='1.2' fill='%232f6b3a' transform='rotate(20 16.5 9)'/%3E%3C/svg%3E");
+  --pizza-morso:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M16 16 L28.12 9 A14 14 0 1 1 16 2 Z' fill='%23e2a857' stroke='%2316130f' stroke-width='1.5' stroke-linejoin='round'/%3E%3Cpath d='M16 16 L25.09 10.75 A10.5 10.5 0 1 1 16 5.5 Z' fill='%23d9351c'/%3E%3Ccircle cx='11' cy='13' r='2.6' fill='%23fff'/%3E%3Ccircle cx='13' cy='21' r='2.6' fill='%23fff'/%3E%3Ccircle cx='21' cy='19' r='2.4' fill='%23fff'/%3E%3Cellipse cx='17' cy='23.5' rx='2.2' ry='1.2' fill='%232f6b3a' transform='rotate(-20 17 23.5)'/%3E%3Cellipse cx='8.5' cy='18' rx='2.2' ry='1.2' fill='%232f6b3a' transform='rotate(60 8.5 18)'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box}
+html{height:100%;scroll-behavior:smooth;cursor:var(--pizza) 16 16,auto}
+body{margin:0;min-height:100%;background:var(--paper);color:var(--ink);font-family:var(--display);font-size:17px;line-height:1.5;font-optical-sizing:auto;-webkit-font-smoothing:antialiased}
+a,button,label,input[type=file],input[type=checkbox],.thumb,.photo{cursor:var(--pizza-morso) 16 16,pointer}
+a{color:inherit}
+img{max-width:100%;display:block}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--pomodoro);outline-offset:3px}
+.label{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:500}
+.btn{border:1.5px solid var(--ink);background:var(--ink);color:var(--paper);padding:.6em 1.3em;font-weight:600;font-size:15px;letter-spacing:.02em}
+.btn:hover:not(:disabled){background:var(--pomodoro);border-color:var(--pomodoro)}
+.btn:disabled{background:transparent;color:var(--muted);border-color:var(--line)}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover:not(:disabled){background:var(--ink);color:var(--paper);border-color:var(--ink)}
+[hidden]{display:none !important}
+
+/* ---------- Entrance: the game ---------- */
+#gate{position:fixed;inset:0;z-index:50;background:var(--paper);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px var(--gutter);overflow:auto}
+.entered #gate{display:none}
+html:not(.entered) body{overflow:hidden}
+#gate .word{width:min(440px,74vw)}
+#gate .word img{display:block;width:100%;height:auto}
+#gate-status{margin:0;font-size:20px;font-weight:600;text-align:center;text-wrap:balance}
+#pitch{width:min(760px,100%);aspect-ratio:720/220;touch-action:manipulation;image-rendering:pixelated;background:var(--pitch)}
+.gate-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center}
+#score-form{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center}
+input[type=text]{font:inherit;font-size:16px;border:0;border-bottom:1.5px solid var(--ink);background:transparent;padding:.4em .2em;min-width:0;width:230px;border-radius:0}
+#save-note{margin:0;font-size:15px;color:var(--muted);min-height:1.5em;text-align:center;text-wrap:balance}
+
+/* ---------- Logo box + menu ---------- */
+.box{position:fixed;z-index:20;top:var(--gutter);left:var(--gutter);width:138px;background:var(--paper);padding:18px 14px 14px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.box .mark{background:none;border:0;padding:0;width:92px;display:block}
+.box .mark img{display:block;width:100%;height:auto}
+.box nav{display:flex;flex-direction:column;gap:5px;font-size:14px}
+.box nav a{text-decoration:none}
+.box nav a:hover{color:var(--pomodoro)}
+.mini{border-top:1px solid var(--line);padding-top:10px;width:100%}
+.mini .label{display:block;color:var(--muted);font-size:10px;margin-bottom:4px}
+.mini ol{list-style:none;margin:0;padding:0;font-size:13px;line-height:1.45;font-variant-numeric:tabular-nums}
+.mini li{display:flex;justify-content:space-between;gap:6px}
+.mini li span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- Home ---------- */
+main{padding:var(--gutter)}
+.row{display:grid;gap:var(--gutter);margin-bottom:var(--gutter)}
+.row.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.row.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cover{position:relative;overflow:hidden;background:#222;color:#fff}
+.row.two .cover{aspect-ratio:4/5}
+.row.three .cover{aspect-ratio:2/3}
+.row.one .cover{aspect-ratio:16/9;min-height:420px}
+.cover-link{position:absolute;inset:0;display:block;color:inherit;text-decoration:none}
+.cover-link picture{display:block;width:100%;height:100%}
+.cover-link img{width:100%;height:100%;object-fit:cover;transition:transform 1.2s cubic-bezier(.2,.6,.2,1)}
+.row.one .cover-link img{object-position:50% 28%}
+.cover:hover .cover-link img{transform:scale(1.025)}
+.cover-link::after{content:"";position:absolute;inset:45% 0 0 0;background:linear-gradient(to bottom,rgba(0,0,0,0),rgba(0,0,0,.62))}
+.cap{position:absolute;left:0;right:0;bottom:92px;z-index:1;text-align:center;padding:0 16px;text-shadow:0 1px 12px rgba(0,0,0,.35)}
+.cap .place{font-size:14px;display:block}
+.cap h2{margin:0;font-size:clamp(22px,2.3vw,32px);font-weight:700;line-height:1.12;text-wrap:balance}
+.cap .date{font-size:12px;font-variant-numeric:tabular-nums;letter-spacing:.06em}
+.strip{position:absolute;z-index:2;left:0;right:0;bottom:16px;display:flex;justify-content:center;align-items:center;gap:6px;padding:0 12px}
+.thumb{width:40px;height:54px;padding:0;border:0;background:#333;opacity:.82;transition:opacity .2s,transform .2s;flex:none}
+.thumb .tpic{display:block;width:100%;height:100%;background-repeat:no-repeat}
+.thumb:hover,.thumb:focus-visible{opacity:1;transform:translateY(-3px)}
+.strip .plus{font-size:12px;font-variant-numeric:tabular-nums;margin-left:4px;letter-spacing:.04em}
+.manifesto{margin:0;padding:clamp(48px,9vw,120px) var(--gutter);text-align:center;font-size:clamp(24px,3.3vw,46px);font-weight:700;line-height:1.18;letter-spacing:-.01em;text-wrap:balance}
+.manifesto em{font-style:normal;color:var(--pomodoro)}
+.more-wrap{display:flex;justify-content:center;padding:clamp(28px,5vw,56px) 0 8px}
+.more{font:inherit;font-size:clamp(18px,2vw,24px);font-style:italic;background:none;color:var(--ink);border:1.5px solid var(--ink);border-radius:999px;padding:.55em 1.5em;display:inline-flex;gap:.6em;align-items:center}
+.more:hover{background:var(--ink);color:var(--paper)}
+.more span{display:inline-block;font-style:normal;animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{50%{transform:translateY(4px)}}
+.batch{scroll-margin-top:24px}
+.manifesto .def{display:block;font-size:max(12px,.36em);letter-spacing:.18em;text-transform:uppercase;font-weight:500;margin-bottom:20px}
+#legal{padding:var(--gutter)}
+.policy{max-width:70ch;padding:clamp(40px,7vw,90px) 0 60px}
+@media (min-width:701px){.policy{margin-left:170px}}
+.policy .back{font-size:14px;text-underline-offset:3px}
+.policy h1{margin:18px 0 6px;font-size:clamp(36px,5.4vw,72px);font-weight:700;line-height:1;letter-spacing:-.02em;text-wrap:balance}
+.policy .updated{margin:0 0 28px;color:var(--muted);font-size:14px}
+.policy h2{font-size:21px;margin:36px 0 8px;font-weight:700}
+.policy h3{font-size:17px;margin:22px 0 4px;font-weight:700}
+.policy p,.policy li{font-size:16.5px;line-height:1.6}
+.policy ul{padding-left:1.2em}
+.policy .todo{background:#fbe9e5;color:var(--pomodoro);padding:0 .25em}
+.policy .table-wrap{overflow-x:auto}
+.policy table{border-collapse:collapse;width:100%;font-size:15px}
+.policy th,.policy td{border-bottom:1px solid var(--line);padding:8px 12px 8px 0;text-align:left;vertical-align:top}
+.policy th{font-weight:700;border-bottom:1.5px solid var(--ink)}
+.policy code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em}
+html.legal #gate{display:none}
+html.legal body{overflow:auto}
+.gate-legal{margin:0;font-size:12.5px;color:var(--muted)}
+/* links stay out of reach while a game is running */
+html.playing .gate-legal{visibility:hidden}
+/* ---------- Hell mode: the entrance page turns black, text white, lava along the bottom ---------- */
+#lava{display:none;position:fixed;left:0;right:0;bottom:0;height:96px;z-index:-1;background-repeat:repeat-x;background-size:256px 96px;image-rendering:pixelated;--lw:-256px;animation:lava 7s linear infinite}
+@keyframes lava{to{background-position:var(--lw) 0}}
+html.hell #lava{display:block}
+html.hell #gate{background:#0b0807;color:#ffffff;padding-bottom:116px}
+html.hell #gate .word img{filter:invert(1)}
+html.hell #pitch{background:#0b0807}
+html.hell #save-note,html.hell .gate-legal,html.hell .form-note{color:rgba(255,255,255,.7)}
+html.hell #gate .btn{background:#ffffff;color:#0b0807;border-color:#ffffff}
+html.hell #gate .btn.ghost{background:transparent;color:#ffffff}
+html.hell #gate .btn:hover:not(:disabled){background:var(--pomodoro);border-color:var(--pomodoro);color:#ffffff}
+html.hell #gate input[type=text]{color:#ffffff;border-bottom-color:#ffffff}
+@media (max-width:700px){#lava{height:72px;background-size:192px 72px;--lw:-192px}html.hell #gate{padding-bottom:88px}}
+@media (prefers-reduced-motion:reduce){#lava{animation:none}}
+.gate-legal a{color:inherit}
+.form-note{flex-basis:100%;margin:0;text-align:center;font-size:13px;color:var(--muted)}
+footer small a{color:inherit}
+
+section.block{max-width:1100px;margin:0 auto;padding:clamp(56px,8vw,110px) 0 0;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:32px 56px}
+section.block h2{margin:0;font-size:clamp(32px,4vw,50px);font-weight:700;line-height:1;letter-spacing:-.01em}
+section.block .lead{margin:14px 0 0;color:var(--muted);max-width:34ch}
+section.block p{max-width:60ch}
+.board{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink);font-variant-numeric:tabular-nums}
+.board li{display:grid;grid-template-columns:2.2em minmax(0,1fr) auto;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);font-size:19px;align-items:baseline}
+.board li:first-child{font-weight:700;font-size:24px}
+.board li:first-child .pos{color:var(--pomodoro)}
+.board .who{overflow-wrap:anywhere}
+.board .empty{display:block;color:var(--muted);font-size:17px;font-weight:400}
+.note{font-size:14px;color:var(--muted);margin:10px 0 0}
+form.raffle{display:grid;gap:18px}
+.field{display:grid;gap:6px}
+.field>label{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:500}
+.field input[type=file]{font:inherit;font-size:15px}
+.ig{display:flex;align-items:baseline;gap:2px}
+.ig span{font-size:18px}
+.check{display:flex;gap:10px;align-items:flex-start;font-size:15px;max-width:52ch}
+.check input{margin-top:.35em;accent-color:var(--pomodoro);width:16px;height:16px;flex:none}
+#preview{max-height:240px;width:auto}
+#raffle-msg{margin:0;font-size:15px;min-height:1.5em}
+/* brands as a credits list: big names on hairlines, the kind of product and an arrow on the right */
+.brands{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
+.brands li{border-bottom:1px solid var(--line)}
+.brands a{display:flex;align-items:baseline;gap:16px;padding:14px 2px;text-decoration:none}
+.brands .bn{font-size:clamp(30px,4vw,52px);font-weight:700;line-height:1.05;letter-spacing:-.01em;transition:transform .35s cubic-bezier(.2,.7,.2,1),color .2s}
+.brands .bk{margin-left:auto;color:var(--muted);font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;white-space:nowrap}
+.brands .ar{font-size:20px;color:var(--muted);transition:transform .35s cubic-bezier(.2,.7,.2,1),color .2s}
+.brands a:hover .bn,.brands a:focus-visible .bn{color:var(--pomodoro);transform:translateX(10px)}
+.brands a:hover .ar,.brands a:focus-visible .ar{color:var(--pomodoro);transform:translate(3px,-3px)}
+.nap{font-style:normal;font-weight:700;color:var(--pomodoro)}
+.trial{display:inline-block;border:1px solid var(--pomodoro);color:var(--pomodoro);padding:2px 8px;margin-top:14px}
+footer{padding:clamp(60px,10vw,140px) 0 28px;text-align:center}
+@media (min-width:701px){section.block{padding-left:176px;max-width:1280px}}
+section.block,#work{scroll-margin-top:70px}
+.bigword{background:none;border:0;padding:0;font-size:clamp(54px,15vw,230px);font-weight:560;line-height:.9;letter-spacing:-.02em;display:inline-block;max-width:100%;overflow-wrap:anywhere}
+.bigword span{display:inline-block;transition:color .15s,transform .25s cubic-bezier(.3,.7,.3,1)}
+.bigword span:hover{color:var(--pomodoro);transform:translateY(-6%)}
+#elle-note{margin:14px 0 0;font-size:14px;color:var(--muted);min-height:1.5em}
+footer small{display:block;margin-top:26px;font-size:13px;color:var(--muted)}
+
+/* ---------- Set page ---------- */
+#set{padding:var(--gutter)}
+.set-head{padding:clamp(40px,7vw,90px) 0 clamp(28px,4vw,48px) 170px;max-width:1100px}
+.set-head .back{font-size:14px;text-underline-offset:3px}
+.set-head h1{margin:18px 0 6px;font-size:clamp(40px,7vw,104px);font-weight:700;line-height:.95;letter-spacing:-.02em;text-wrap:balance}
+.set-head p{margin:0;color:var(--muted);font-variant-numeric:tabular-nums}
+.photos{columns:3;column-gap:var(--gutter)}
+.photo{display:block;width:100%;padding:0;border:0;background:#eee;margin:0 0 var(--gutter);break-inside:avoid}
+.photo img{width:100%;height:auto}
+.set-foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:28px 0 12px;font-size:16px}
+
+/* ---------- Lightbox ---------- */
+/* the enlarged photo takes the whole screen on black, so it reads clearly as a different view */
+#lightbox{position:fixed;inset:0;z-index:70;background:#000;color:#fff}
+.lb-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.lb-stage img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.lb-bar{position:absolute;top:0;left:0;right:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px var(--gutter) 28px;background:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,0));font-variant-numeric:tabular-nums;font-size:14px;transition:opacity .4s}
+#lightbox.idle .lb-bar{opacity:0}
+.lb-bar .ctrl{display:flex;gap:8px}
+.lb-bar button{background:rgba(0,0,0,.25);color:#fff;border:1px solid rgba(255,255,255,.85);padding:.3em .9em;font-size:14px}
+.lb-bar button:hover{background:#fff;color:#000}
+.lb-arrow{position:absolute;top:50%;z-index:2;transform:translateY(-50%);width:56px;height:56px;padding:0;border-radius:50%;border:1px solid rgba(255,255,255,.7);background:rgba(0,0,0,.35);color:#fff;display:flex;align-items:center;justify-content:center;transition:opacity .4s,background .2s,color .2s}
+.lb-arrow svg{width:24px;height:24px}
+.lb-arrow.prev{left:24px}
+.lb-arrow.next{right:24px}
+.lb-arrow:hover{background:#fff;color:#000}
+#lightbox.idle .lb-arrow{opacity:0}
+.lb-hint{display:none;color:rgba(255,255,255,.7)}
+.lb-stage img{touch-action:pan-y pinch-zoom;user-select:none;-webkit-user-drag:none}
+/* touch screens: no arrows, the photos are swiped */
+@media (hover:none),(pointer:coarse){.lb-arrow{display:none}.lb-hint{display:inline}}
+
+.tap{position:fixed;z-index:60;width:32px;height:32px;margin:-16px 0 0 -16px;background:var(--pizza) center/contain no-repeat;pointer-events:none;animation:tap .55s ease-out forwards}
+@keyframes tap{from{transform:scale(.6);opacity:1}to{transform:scale(1.7) rotate(40deg);opacity:0}}
+
+@media (max-width:900px){
+  .photos{columns:2}
+  section.block{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:700px){
+  #gate{gap:12px;touch-action:manipulation}
+  #gate .word{width:min(300px,68vw)}
+  .gate-legal{position:absolute;top:12px;right:var(--gutter)}
+  #gate-status{font-size:18px}
+  #pitch{width:calc(100% + 2 * var(--gutter));max-width:none;aspect-ratio:400/220}
+  .box{top:0;left:0;right:0;width:auto;flex-direction:row;justify-content:space-between;padding:8px var(--gutter);border-bottom:1px solid var(--line)}
+  .box .mark{width:58px}
+  .box nav{flex-direction:row;flex-wrap:wrap;justify-content:flex-end;gap:2px 11px;font-size:12.5px}
+  .mini{display:none}
+  main,#set,#legal{padding-top:76px}
+  .row.two,.row.three{grid-template-columns:minmax(0,1fr)}
+  .row.two .cover,.row.three .cover,.row.one .cover{aspect-ratio:4/5;min-height:0}
+  .set-head{padding-left:0}
+  .brands a{padding:12px 2px;gap:10px}
+  .photos{columns:1}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .tap{animation:none}
+  .cover-link img,.thumb,.bigword span,.brands .bn,.brands .ar{transition:none}
+  .more span{animation:none}
+  .tap{display:none}
+}
+</style>
+</head>
+<body>
+
+<div id="gate" role="dialog" aria-label="Entrance game">
+  <div class="word"><img src="img/logo.png" alt="Allllleria" width="1500" height="404"></div>
+  <p id="gate-status" aria-live="polite">Score 5 points to enter the website.</p>
+  <canvas id="pitch" width="720" height="220" tabindex="0" aria-label="Game: press space or tap to jump over the defenders"></canvas>
+  <p id="save-note" aria-live="polite">Press space or tap to jump over the defenders.</p>
+  <form id="score-form" hidden>
+    <label class="label" for="nick">Name or nickname</label>
+    <input type="text" id="nick" maxlength="24" autocomplete="nickname" placeholder="Your name">
+    <button class="btn ghost" type="submit" id="btn-save">Save to leaderboard</button>
+    <p class="form-note">Your name or nickname will be shown publicly on the leaderboard. <a href="#privacy">Privacy policy</a></p>
+  </form>
+  <div class="gate-row">
+    <button class="btn ghost" type="button" id="btn-retry" hidden>Play again</button>
+    <button class="btn" type="button" id="btn-enter" hidden>Enter the website</button>
+  </div>
+  <div id="lava" aria-hidden="true"></div>
+  <p class="gate-legal"><a href="#privacy">Privacy policy</a> · <a href="#cookies">Cookie policy</a></p>
+</div>
+
+<header class="box">
+  <button class="mark" type="button" id="mark" aria-label="Allllleria, back to the top"><img src="img/mark.png" alt="" width="600" height="304"></button>
+  <nav aria-label="Sections">
+    <a href="#work">Work</a>
+    <a href="#leaderboard">Leaderboard</a>
+    <a href="#giveaway">Giveaway</a>
+    <a href="#collaborations">Collabs</a>
+    <a href="#about">About</a>
+  </nav>
+  <div class="mini" aria-label="Top three players">
+    <span class="label">Top 3</span>
+    <ol id="mini"></ol>
+  </div>
+</header>
+
+<main id="home">
+  <div id="work">
+    <div class="row two" data-sets="1,2"></div>
+    <p class="manifesto"><span class="def"><em>Alleria</em> · Neapolitan</span>The soft breeze<br>that sweeps over you while you're lost in thought,<br>gently pulling you back to moments of greater joy.</p>
+    <div class="row one" data-sets="3"></div>
+    <div class="row three" data-sets="4,5,6"></div>
+    <div class="row three" data-sets="7,8,9"></div>
+    <!-- the rest of the sets, shown a block at a time by the "soft breeze" button -->
+    <div id="more-rows">
+      <div class="batch" hidden><div class="row two" data-sets="10,11"></div><div class="row one" data-sets="15"></div><div class="row three" data-sets="12,13,14"></div></div>
+      <div class="batch" hidden><div class="row two" data-sets="16,17"></div><div class="row one" data-sets="25"></div><div class="row three" data-sets="18,19,20"></div></div>
+      <div class="batch" hidden><div class="row two" data-sets="24,28"></div><div class="row one" data-sets="21"></div><div class="row three" data-sets="26,27,29"></div></div>
+      <div class="batch" hidden><div class="row two" data-sets="30,31"></div></div>
+    </div>
+    <div class="more-wrap"><button class="more" id="more" type="button">Scroll for more soft breeze <span aria-hidden="true">↓</span></button></div>
+  </div>
+
+  <section class="block" id="leaderboard">
+    <div>
+      <h2>Leaderboard</h2>
+      <p class="lead">Everyone who dribbled past 5 defenders or more on the way in.</p>
+      <p style="margin-top:22px"><button class="btn" type="button" id="btn-play">Play again</button></p>
+    </div>
+    <div>
+      <ol class="board" id="board"></ol>
+      <p class="note" id="board-note"></p>
+    </div>
+  </section>
+
+  <section class="block" id="giveaway">
+    <div>
+      <h2>Giveaway</h2>
+      <p class="lead">Leave one of your photos and your Instagram name. I draw one entry and repost it on Allllleria with a dedication.</p>
+      <span class="label trial">Opening soon</span>
+    </div>
+    <form class="raffle" id="raffle" novalidate>
+      <div class="field">
+        <label for="foto">Your photo</label>
+        <input type="file" id="foto" accept="image/*">
+        <img id="preview" alt="Preview of the photo you chose" hidden>
+      </div>
+      <div class="field">
+        <label for="ig">Your Instagram name</label>
+        <div class="ig"><span>@</span><input type="text" id="ig" maxlength="30" autocomplete="off" placeholder="yourname"></div>
+      </div>
+      <label class="check" for="consenso"><input type="checkbox" id="consenso"> <span>I am at least 14 years old and I agree that my photo may be reposted on the Allllleria Instagram profile with my Instagram name, as described in the <a href="#privacy">privacy policy</a>.</span></label>
+      <div><button class="btn" type="submit">Try entering</button></div>
+      <p id="raffle-msg" aria-live="polite"></p>
+    </form>
+  </section>
+
+  <section class="block" id="collaborations">
+    <div>
+      <h2>Collaborations</h2>
+      <p class="lead">Brands and people Allllleria works with.</p>
+    </div>
+    <div>
+      <ul class="brands" aria-label="Brands Allllleria has worked with">
+        <li><a href="https://brightinstar.com/"><span class="bn">Brightin Star</span><span class="bk">Lenses</span><span class="ar" aria-hidden="true">↗</span></a></li>
+        <li><a href="https://www.astrhori.cn/"><span class="bn">AstrHori</span><span class="bk">Lenses</span><span class="ar" aria-hidden="true">↗</span></a></li>
+        <li><a href="https://eu.urth.co/"><span class="bn">Urth</span><span class="bk">Filters</span><span class="ar" aria-hidden="true">↗</span></a></li>
+      </ul>
+      <p class="note">For a collaboration, write to <a href="mailto:hello.allllleria@gmail.com">hello.allllleria@gmail.com</a> or to <a href="https://www.instagram.com/allllleria/">@allllleria</a> on Instagram.</p>
+    </div>
+  </section>
+
+  <section class="block" id="about">
+    <div><h2>Why Allllleria</h2></div>
+    <div>
+      <p style="margin-top:0;font-size:21px">Allllleria is the photographic project of Matteo Venanzio, a Neapolitan lost somewhere in the world, camera in hand and probably looking for the best light.</p>
+      <p>Allllleria is my way of collecting places, people, cities and fleeting moments that make life feel a little more beautiful. Like a soft breeze that gently brings you back to a feeling of joy and lightness.</p>
+      <p>In Naples, we call that feeling <em class="nap">Alleria</em>. And I hope that somewhere between these photographs, you'll find a little bit of it too.</p>
+      <p>New photographs appear first on Instagram: <a href="https://www.instagram.com/allllleria/">@allllleria</a>. To get in touch: <a href="mailto:hello.allllleria@gmail.com">hello.allllleria@gmail.com</a>.</p>
+      <p class="note">Titles, places and texts on this page are placeholders.</p>
+    </div>
+  </section>
+
+  <footer>
+    <button class="bigword" type="button" id="elle" aria-label="Allllleria: add an L"></button>
+    <p id="elle-note" aria-live="polite"></p>
+    <small>© Allllleria · Matteo Venanzio. All photographs by the author.<br><a href="mailto:hello.allllleria@gmail.com">hello.allllleria@gmail.com</a> · <a href="#privacy">Privacy policy</a> · <a href="#cookies">Cookie policy</a></small>
+  </footer>
+</main>
+
+<div id="set" hidden>
+  <div class="set-head">
+    <a class="back" href="#work">← All work</a>
+    <h1 id="set-title"></h1>
+    <p id="set-meta"></p>
+  </div>
+  <div class="photos" id="photos"></div>
+  <div class="set-foot"><a href="#work">← All work</a><a id="set-next" href="#work"></a></div>
+</div>
+
+<div id="legal" lang="it" hidden>
+  <article class="policy" id="privacy-doc">
+    <a class="back" href="#work">← Back to the website</a>
+    <h1>Informativa sulla privacy</h1>
+    <p class="updated">Ultimo aggiornamento: 16 novembre 2026</p>
+
+    <p>Questa informativa spiega quali dati personali raccoglie il sito Allllleria, perché li raccoglie e quali diritti hai, secondo gli articoli 13 e 14 del Regolamento (UE) 2016/679 (GDPR). Vale solo per questo sito, non per i siti esterni a cui rimanda, come Instagram.</p>
+
+    <h2>1. Titolare del trattamento</h2>
+    <p>Il titolare del trattamento è <strong>Matteo Venanzio</strong>, autore del progetto fotografico Allllleria. Per qualsiasi domanda sui tuoi dati puoi scrivere a <a href="mailto:hello.allllleria@gmail.com">hello.allllleria@gmail.com</a>.</p>
+
+    <h2>2. Quali dati raccogliamo e perché</h2>
+
+    <h3>a) Dati di navigazione</h3>
+    <p>Il server che ospita il sito registra in automatico alcuni dati tecnici a ogni visita: indirizzo IP, data e ora della richiesta, pagina richiesta, tipo di browser e sistema operativo. Servono solo a far funzionare il sito e a proteggerlo da abusi e attacchi. Non vengono usati per identificarti né per creare profili.</p>
+    <p><em>Base giuridica:</em> legittimo interesse del titolare alla sicurezza e al funzionamento del sito (art. 6.1.f GDPR).<br>
+    <em>Conservazione:</em> per il tempo necessario, di norma non oltre 30 giorni, salvo che servano per accertare reati.</p>
+
+    <h3>b) Classifica del gioco</h3>
+    <p>Il gioco d'ingresso non richiede dati. Se a fine partita scegli di salvarti in classifica, raccogliamo il <strong>nome o nickname</strong> che scrivi e il tuo <strong>punteggio</strong>. Nome e punteggio sono <strong>visibili pubblicamente</strong> a tutti i visitatori del sito. Se non vuoi farti riconoscere, usa un nickname.</p>
+    <p><em>Base giuridica:</em> il tuo consenso, che dai quando premi "Save to leaderboard" (art. 6.1.a GDPR).<br>
+    <em>Conservazione:</em> finché il tuo nome resta in classifica o finché non chiedi di cancellarlo. La classifica può essere azzerata in qualsiasi momento.</p>
+
+    <h3>c) Sorteggio (Giveaway)</h3>
+    <p>Per partecipare al sorteggio invii una <strong>tua fotografia</strong> e il tuo <strong>nome utente Instagram</strong>. Li usiamo per svolgere l'estrazione e, solo per la foto estratta, per <strong>ripubblicarla sul profilo Instagram Allllleria</strong> con una dedica e la menzione del tuo nome utente.</p>
+    <p>Se nella foto compaiono altre persone riconoscibili, devi avere il loro permesso prima di inviarla.</p>
+    <p><em>Base giuridica:</em> il tuo consenso, che dai spuntando la casella del modulo (art. 6.1.a GDPR).<br>
+    <em>Conservazione:</em> le foto non estratte vengono cancellate entro 30 giorni dall'estrazione. La foto estratta resta pubblicata su Instagram finché non chiedi di rimuoverla.</p>
+    <p>Il sorteggio è riservato a chi ha compiuto 14 anni, l'età minima prevista in Italia per dare da soli il consenso a questi servizi (art. 2-quinquies del Codice privacy). Sotto i 14 anni serve il consenso di un genitore.</p>
+
+    <h3>d) Messaggi</h3>
+    <p>Se scrivi via email o tramite Instagram, usiamo i dati che ci mandi solo per risponderti. Li conserviamo per il tempo necessario a gestire la richiesta.</p>
+
+    <h2>3. Dati facoltativi</h2>
+    <p>Puoi visitare il sito senza fornire alcun dato. Darci il tuo nome per la classifica o la tua foto per il sorteggio è una tua scelta. Se non lo fai, semplicemente non comparirai in classifica o non parteciperai all'estrazione.</p>
+
+    <h2>4. Chi vede i tuoi dati</h2>
+    <ul>
+      <li><strong>Matteo Venanzio</strong>, titolare del trattamento.</li>
+      <li><strong>Il fornitore di hosting del sito</strong> (GitHub, Inc., servizio GitHub Pages), che tratta i dati per conto del titolare come responsabile del trattamento (art. 28 GDPR).</li>
+      <li><strong>Instagram</strong> (Meta Platforms Ireland Ltd.), solo per la foto estratta nel sorteggio. Una volta pubblicata su Instagram, la foto è soggetta anche all'informativa di Meta.</li>
+      <li><strong>Tutti i visitatori</strong>, solo per nome o nickname e punteggio in classifica.</li>
+    </ul>
+    <p>I tuoi dati non vengono venduti, non vengono usati per pubblicità o newsletter e non vengono usati per profilarti.</p>
+
+    <h2>5. Trasferimenti fuori dall'Unione europea</h2>
+    <p>Se il fornitore di hosting o Meta trattano dati fuori dallo Spazio economico europeo, lo fanno con le garanzie previste dal GDPR: decisioni di adeguatezza della Commissione europea o clausole contrattuali standard.</p>
+
+    <h2>6. Come trattiamo i dati</h2>
+    <p>I dati sono trattati con strumenti elettronici e con misure di sicurezza adeguate a evitare perdite, usi illeciti e accessi non autorizzati.</p>
+
+    <h2>7. I tuoi diritti</h2>
+    <p>Puoi chiedere in qualsiasi momento di:</p>
+    <ul>
+      <li>sapere quali tuoi dati abbiamo e riceverne una copia (accesso);</li>
+      <li>correggerli (rettifica);</li>
+      <li>cancellarli, per esempio togliere il tuo nome dalla classifica o la tua foto dal sorteggio (cancellazione);</li>
+      <li>limitarne l'uso (limitazione);</li>
+      <li>riceverli in un formato leggibile da un computer (portabilità);</li>
+      <li>opporti al trattamento basato sul legittimo interesse (opposizione).</li>
+    </ul>
+    <p>Puoi anche <strong>revocare il consenso</strong> in qualsiasi momento. La revoca non rende illecito quello che è stato fatto prima. Per esercitare questi diritti scrivi a <a href="mailto:hello.allllleria@gmail.com">hello.allllleria@gmail.com</a>. Ti rispondiamo entro 30 giorni.</p>
+
+    <h2>8. Reclamo</h2>
+    <p>Se pensi che i tuoi dati siano trattati in modo non corretto, puoi presentare reclamo al Garante per la protezione dei dati personali: <a href="https://www.garanteprivacy.it">www.garanteprivacy.it</a>.</p>
+
+    <h2>9. Cookie</h2>
+    <p>Il sito non usa cookie di profilazione né strumenti di statistica. I dettagli sono nella <a href="#cookies">cookie policy</a>.</p>
+
+    <h2>10. Modifiche</h2>
+    <p>Questa informativa può essere aggiornata, per esempio quando il sito cambia. La data dell'ultimo aggiornamento è indicata in alto.</p>
+  </article>
+
+  <article class="policy" id="cookies-doc">
+    <a class="back" href="#work">← Back to the website</a>
+    <h1>Cookie policy</h1>
+    <p class="updated">Ultimo aggiornamento: 16 novembre 2026</p>
+
+    <h2>1. Cosa sono i cookie</h2>
+    <p>I cookie e gli strumenti simili, come la memoria locale del browser, sono piccole quantità di dati che un sito salva sul tuo dispositivo. Alcuni sono tecnici e servono a far funzionare il sito. Altri servono a misurare le visite o a mostrarti pubblicità mirata, e per questi la legge richiede il tuo consenso.</p>
+
+    <h2>2. Cosa usa questo sito</h2>
+    <p>Allllleria <strong>non usa</strong>:</p>
+    <ul>
+      <li>cookie di profilazione o pubblicitari;</li>
+      <li>strumenti di statistica, come Google Analytics;</li>
+      <li>pixel di social network, come il Meta Pixel;</li>
+      <li>contenuti incorporati da altri siti, come post social, video o mappe.</li>
+    </ul>
+    <p>Anche il carattere tipografico è caricato dal sito stesso, non da servizi esterni.</p>
+    <p>Il sito usa solo la memoria locale del browser, per scopi tecnici:</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Nome</th><th>Tipo</th><th>A cosa serve</th><th>Durata</th></tr></thead>
+        <tbody>
+          <tr><td><code>allllleria-entered</code></td><td>sessionStorage</td><td>Ricorda che hai già superato il gioco d'ingresso, così non devi rigiocare mentre navighi.</td><td>Si cancella quando chiudi la scheda.</td></tr>
+          <tr><td><code>allllleria-leaderboard</code></td><td>localStorage</td><td>Salva la classifica su questo dispositivo quando la classifica condivisa non è disponibile.</td><td>Finché non cancelli i dati del sito dal browser.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Il server registra inoltre i dati di navigazione descritti nell'<a href="#privacy">informativa sulla privacy</a>. Questi dati non sono cookie e non restano sul tuo dispositivo.</p>
+
+    <h2>3. Perché non c'è un banner per il consenso</h2>
+    <p>Gli strumenti tecnici necessari a fornire il servizio che chiedi non richiedono consenso (art. 122 del Codice privacy e Linee guida del Garante del 10 giugno 2021). Per questo il sito non mostra un banner. Se in futuro verranno aggiunti strumenti di statistica o di terze parti, comparirà un banner per scegliere prima che vengano usati.</p>
+
+    <h2>4. Link esterni</h2>
+    <p>I link a Instagram e ad altri siti portano fuori da Allllleria. Quei siti usano i propri cookie secondo le proprie informative.</p>
+
+    <h2>5. Come cancellarli</h2>
+    <p>Puoi cancellare in qualsiasi momento i dati salvati da questo sito dalle impostazioni del tuo browser, alla voce che gestisce cookie e dati dei siti. Dopo averli cancellati, all'ingresso ti verrà chiesto di rigiocare.</p>
+
+    <h2>6. Contatti</h2>
+    <p>Il titolare è Matteo Venanzio. Per domande scrivi a <a href="mailto:hello.allllleria@gmail.com">hello.allllleria@gmail.com</a>.</p>
+  </article>
+</div>
+
+<div id="lightbox" role="dialog" aria-label="Enlarged photograph" hidden>
+  <div class="lb-bar">
+    <span><span id="lb-count"></span><span class="lb-hint"> · Swipe to browse</span></span>
+    <span class="ctrl"><button type="button" id="lb-close">Close</button></span>
+  </div>
+  <div class="lb-stage"><img id="lb-img" alt=""></div>
+  <button type="button" class="lb-arrow prev" id="lb-prev" aria-label="Previous photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M15 4 7 12l8 8"/></svg></button>
+  <button type="button" class="lb-arrow next" id="lb-next" aria-label="Next photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="m9 4 8 8-8 8"/></svg></button>
+</div>
+
+<script>
+"use strict";
+/* ---------- Data (placeholder titles and places) ---------- */
+const PHOTOS = {"1":[{"f":"s1-DSC01490","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s1-DSC01499","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s1-DSC01504","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s1-DSC01506","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s1-DSC01508","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s1-DSC01525","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s1-DSC01531","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s1-DSC01539","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s1-DSC01546","w":992,"h":1500,"xw":1354,"xh":2048},{"f":"s1-DSC01615","w":1000,"h":1500,"xw":1365,"xh":2048}],"2":[{"f":"s2-DSC01360","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01361","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01363","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01364","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01366","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01368","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01369","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01370","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01372","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01375","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01377","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01378","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01382","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01384","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01385","w":1000,"h":1500,"xw":1366,"xh":2048},{"f":"s2-DSC01386","w":1000,"h":1500,"xw":1366,"xh":2048},{"f":"s2-DSC01388","w":1000,"h":1500,"xw":1366,"xh":2048},{"f":"s2-DSC01391","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s2-DSC01392","w":1000,"h":1500,"xw":1366,"xh":2048},{"f":"s2-DSC01393","w":1000,"h":1500,"xw":1365,"xh":2048}],"3":[{"f":"s3-DSC07552","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07554","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07556","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07560","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07561","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07565","w":1500,"h":1000,"xw":2048,"xh":1365},{"f":"s3-DSC07576","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07584","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07600","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07606","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07615","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07619","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07633","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07639","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07650","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07657","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07662","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07677","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07681","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07683","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07687","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07698","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07708","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s3-DSC07722","w":1000,"h":1500,"xw":1365,"xh":2048}],"4":[{"f":"s4-DSC07184","w":1003,"h":1500,"xw":1064,"xh":1592},{"f":"s4-DSC07197","w":1002,"h":1500,"xw":1080,"xh":1616},{"f":"s4-DSC07201","w":1002,"h":1500,"xw":1080,"xh":1616},{"f":"s4-DSC07204","w":1003,"h":1500,"xw":1069,"xh":1599},{"f":"s4-DSC07206","w":1002,"h":1500,"xw":1080,"xh":1616},{"f":"s4-DSC07209","w":1002,"h":1500,"xw":1080,"xh":1616},{"f":"s4-DSC07210","w":1002,"h":1500,"xw":1080,"xh":1616},{"f":"s4-DSC07215","w":1002,"h":1500,"xw":1080,"xh":1616},{"f":"s4-DSC07218","w":1002,"h":1500,"xw":1080,"xh":1616},{"f":"s4-DSC07224","w":1002,"h":1500,"xw":1080,"xh":1616}],"5":[{"f":"s5-DSC06873","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s5-DSC06925","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s5-DSC06936","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s5-DSC06953","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s5-DSC06976","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s5-DSC06982","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s5-DSC06987","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s5-DSC07001","w":1500,"h":1000,"xw":2048,"xh":1365},{"f":"s5-DSC07005","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s5-DSC07014","w":1000,"h":1500,"xw":1365,"xh":2048}],"6":[{"f":"s6-DSC02397","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s6-DSC02410","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s6-DSC02412","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s6-DSC02417","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s6-DSC02418","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s6-DSC02423","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s6-DSC02425","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s6-DSC02432","w":983,"h":1500,"xw":1342,"xh":2048},{"f":"s6-DSC02438","w":1000,"h":1500,"xw":1365,"xh":2048},{"f":"s6-DSC02465","w":1000,"h":1500,"xw":1365,"xh":2048}],"7":[{"f":"s7-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3206,"oh":4810},{"f":"s7-105FE1CB8183","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s7-29A9CACD5BC4","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s7-5A45F16024CE","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s7-72EDBAE23E14","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s7-928FBF888894","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s7-950062E256EC","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s7-A1CD79916B64","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s7-E339AD98E63B","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s7-EDA34A67AE51","w":800,"h":1200,"xw":1366,"xh":2048,"ow":3214,"oh":4820}],"8":[{"f":"s8-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-157DC53F3153","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3040,"oh":4560},{"f":"s8-4E23290EE426","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s8-B87545940EA9","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s8-D2E768D08FBA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s8-DSC02619","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3980,"oh":5970},{"f":"s8-DSC02627","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-DSC02629","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3994,"oh":5991},{"f":"s8-DSC02631","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-DSC02632","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-DSC02638","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-DSC02643","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-DSC02649","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-DSC02653","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-DSC02654","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-DSC02659","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3750,"oh":5627},{"f":"s8-DSC02662","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-DSC02666","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-DSC02668","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-DSC02670","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s8-F3649E6A824A","w":1200,"h":800,"xw":2048,"xh":1365,"ow":4896,"oh":3264}],"9":[{"f":"s9-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s9-0E04E99BCDC8","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3214,"oh":4822},{"f":"s9-1AB873098379","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s9-26E4EAE50D95","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s9-2938CA73107E","w":783,"h":1200,"xw":1337,"xh":2048,"ow":3147,"oh":4820},{"f":"s9-2AFA41F77CE1","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s9-555589CE1AE2","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s9-6578C0C92DD1","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s9-8968D3462BF1","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s9-8A56CE1821F3","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s9-99AD622188A7","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s9-B261E9A5B0CF","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s9-EF93932FC085","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896}],"10":[{"f":"s10-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s10-DSC02588","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s10-DSC02589","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s10-DSC02590","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s10-DSC02591","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s10-DSC02594","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s10-DSC02601","w":784,"h":1200,"xw":1338,"xh":2048,"ow":3899,"oh":5969},{"f":"s10-DSC02603","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s10-DSC02611","w":793,"h":1200,"xw":1353,"xh":2048,"ow":3909,"oh":5915},{"f":"s10-DSC02613","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"11":[{"f":"s11-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02170","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02175","w":800,"h":1200,"xw":1366,"xh":2048,"ow":3910,"oh":5864},{"f":"s11-DSC02180","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02181","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02185","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02189","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02197","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02202","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02206","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02342","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02356","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02357","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s11-DSC02362","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"12":[{"f":"s12-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s12-DSC02364","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s12-DSC02368","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s12-DSC02374","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s12-DSC02384","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s12-DSC02387","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s12-DSC02389","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s12-DSC02393","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s12-DSC02396","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s12-DSC02402","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s12-DSC02404","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s12-DSC02425","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"13":[{"f":"s13-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s13-DSC02129","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s13-DSC02130","w":772,"h":1200,"xw":1318,"xh":2048,"ow":3730,"oh":5796},{"f":"s13-DSC02135","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s13-DSC02142","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s13-DSC02144","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"14":[{"f":"s14-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s14-DSC02092","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s14-DSC02096","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s14-DSC02099","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s14-DSC02100","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s14-DSC02102","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s14-DSC02103","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"15":[{"f":"s15-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02060","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02061","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02062","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02063","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3748,"oh":5623},{"f":"s15-DSC02064","w":787,"h":1200,"xw":1343,"xh":2048,"ow":3865,"oh":5895},{"f":"s15-DSC02065","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02073","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02074","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02076","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02079","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02082","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02087","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02088","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s15-DSC02091","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"16":[{"f":"s16-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3828,"oh":5742},{"f":"s16-DSC01904","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s16-DSC01909","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s16-DSC01921","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s16-DSC01923","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s16-DSC01929","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s16-DSC01930","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s16-DSC01932","w":796,"h":1200,"xw":1358,"xh":2048,"ow":3926,"oh":5921},{"f":"s16-DSC01936","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s16-DSC01937","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"17":[{"f":"s17-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s17-DSC01752","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s17-DSC01771","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s17-DSC01788","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s17-DSC01792","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3980,"oh":5970},{"f":"s17-DSC01795","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s17-DSC01797","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s17-DSC01798","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s17-DSC01800","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3910,"oh":5866},{"f":"s17-DSC01801","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s17-DSC01803","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3980,"oh":5970},{"f":"s17-DSC01859","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"18":[{"f":"s18-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s18-081F8CA9B269","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s18-15BE24F10CAA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s18-2C35B5D2FCA9","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s18-5A2BBA9A707F","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s18-6ADF3D7AFE32","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s18-A497A5A7CF15","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896}],"19":[{"f":"s19-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s19-0369C50D6A36","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s19-18BB9BFABA2D","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s19-36710908CCA2","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s19-49B76E83B30D","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s19-6F238BBCFF20","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s19-7B3215ADEED3","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s19-7BD7EEF94AA4","w":800,"h":1200,"xw":1366,"xh":2048,"ow":3214,"oh":4820},{"f":"s19-84ED007F3B06","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s19-89342740A343","w":787,"h":1200,"xw":1342,"xh":2048,"ow":3179,"oh":4850},{"f":"s19-96314BD9F1BC","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s19-992BD914360B","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3204,"oh":4806},{"f":"s19-C06CAC678D15","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s19-F1C69741A584","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896}],"20":[{"f":"s20-COPERTINA","w":764,"h":1200,"xw":1304,"xh":2048,"ow":3118,"oh":4896},{"f":"s20-1929518EDF63","w":769,"h":1200,"xw":1312,"xh":2048,"ow":2882,"oh":4498},{"f":"s20-47D6A3162EB1","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s20-6C912AD128EA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s20-7284AFAA9149","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s20-830C93354699","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s20-C92F313DF5FB","w":777,"h":1200,"xw":1325,"xh":2048,"ow":3037,"oh":4693},{"f":"s20-D7C889547A9B","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896}],"21":[{"f":"s21-COPERTINA","w":769,"h":1200,"xw":1312,"xh":2048,"ow":3785,"oh":5909},{"f":"s21-DSC01399","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s21-DSC01400","w":785,"h":1200,"xw":1340,"xh":2048,"ow":3878,"oh":5926},{"f":"s21-DSC01411","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s21-DSC01412","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s21-DSC01416","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3968,"oh":5952},{"f":"s21-DSC01417","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3989,"oh":5983}],"24":[{"f":"s24-COPERTINA","w":796,"h":1200,"xw":1358,"xh":2048,"ow":3212,"oh":4843},{"f":"s24-268AD50FA096","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s24-38AE70BEE622","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s24-38C7C473E8A8","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s24-5C398BA070AD","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3259,"oh":4889},{"f":"s24-5E2AC328EE94","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s24-6F0232B78F11","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s24-817F57AD65E9","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s24-D0D56E6579E4","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s24-FEE43CEF84B6","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896}],"25":[{"f":"s25-COPERTINA","w":787,"h":1200,"xw":1344,"xh":2048,"ow":3787,"oh":5772},{"f":"s25-DSC00875","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3425,"oh":5139},{"f":"s25-DSC00910","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s25-DSC00915","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s25-DSC00917","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s25-DSC00920","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s25-DSC00932","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s25-DSC00958","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s25-DSC00960","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s25-DSC00966","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s25-DSC00970","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s25-IMG20260406W","w":900,"h":1200,"xw":1426,"xh":1902,"ow":1426,"oh":1902}],"26":[{"f":"s26-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s26-DSC00635","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s26-DSC00638","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s26-DSC00642","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s26-DSC00647","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s26-DSC00648","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s26-DSC00649","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s26-DSC00650","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s26-DSC00651","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s26-DSC00653","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"27":[{"f":"s27-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3940,"oh":5910},{"f":"s27-DSC00030","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s27-DSC00032","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s27-DSC00036","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s27-DSC00039","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3920,"oh":5880},{"f":"s27-DSC00043","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s27-DSC00048","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s27-DSC00049","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s27-DSC00051","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s27-DSC00058","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s27-DSC00061","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s27-DSC00062","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"28":[{"f":"s28-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s28-DSC09802","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3920,"oh":5880},{"f":"s28-DSC09804","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s28-DSC09806","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s28-DSC09809","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3980,"oh":5970},{"f":"s28-DSC09815","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s28-DSC09816","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s28-DSC09822","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s28-DSC09824","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s28-DSC09826","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3904,"oh":5856}],"29":[{"f":"s29-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202510301549","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202510301550","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202510301551","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202510301552","w":800,"h":1200,"xw":1366,"xh":2048,"ow":3206,"oh":4808},{"f":"s29-2025103015522","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202510301553","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202510301555","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202510301556","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-2025103015562","w":800,"h":1200,"xw":1365,"xh":2048,"ow":2692,"oh":4038},{"f":"s29-202510301558","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-2025103015582","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202510301559","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202510301936","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202510301938","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202511011217","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3214,"oh":4821},{"f":"s29-202511011218","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202511011219","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202511011229","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3264,"oh":4896},{"f":"s29-202511011233","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3082,"oh":4624},{"f":"s29-DSC09579","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"30":[{"f":"s30-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3937,"oh":5905},{"f":"s30-DSC08725","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08732","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08743","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08760","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08761","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08771","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08807","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08812","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08815","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08840","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08842","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3869,"oh":5803},{"f":"s30-DSC08853","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3976,"oh":5964},{"f":"s30-DSC08865","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08867","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s30-DSC08872","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}],"31":[{"f":"s31-COPERTINA","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09412","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09417","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09420","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09422","w":800,"h":1200,"xw":1365,"xh":2048,"ow":2971,"oh":4456},{"f":"s31-DSC09424","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09435","w":800,"h":1200,"xw":1365,"xh":2048,"ow":2869,"oh":4304},{"f":"s31-DSC09441","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09443","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09448","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09459","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09487","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09495","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09505","w":800,"h":1200,"xw":1365,"xh":2048,"ow":3963,"oh":5945},{"f":"s31-DSC09506","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09509","w":800,"h":1200,"xw":1366,"xh":2048,"ow":3942,"oh":5912},{"f":"s31-DSC09511","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09513","w":789,"h":1200,"xw":1346,"xh":2048,"ow":3902,"oh":5935},{"f":"s31-DSC09516","w":775,"h":1200,"xw":1322,"xh":2048,"ow":3777,"oh":5850},{"f":"s31-DSC09520","w":792,"h":1200,"xw":1352,"xh":2048,"ow":3887,"oh":5887},{"f":"s31-DSC09521","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09525","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000},{"f":"s31-DSC09528","w":800,"h":1200,"xw":1365,"xh":2048,"ow":4000,"oh":6000}]};
+const SETS = [
+  {n:1, title:"Swim Hour",               place:"Alicante, Spain",           date:"08/2026", cover:"s1-DSC01525", crop:true},
+  {n:2, title:"Rocks & Umbrellas",       place:"Sorrento, Italy",           date:"06/2026", cover:"s2-DSC01360", crop:true},
+  {n:3, title:"Concrete in Colour",      place:"Marseille, France",         date:"08/2025", cover:"s3-DSC07561", crop:true},
+  {n:4, title:"Heading West",            place:"Mediterranean Sea",         date:"08/2025", cover:"s4-DSC07206"},
+  {n:5, title:"Last Light on the Pier",  place:"Santa Monica, California",  date:"07/2025", cover:"s5-DSC07005"},
+  {n:6, title:"Through the Trusses",     place:"Porto, Portugal",           date:"09/2026", cover:"s6-DSC02412"},
+  {n:7,  title:"Coastal Path",            place:"Alicante, Spain",           date:"07/2026", cover:"s7-COPERTINA"},
+  {n:8,  title:"The Other Photographer",  place:"Alicante, Spain",             date:"11/2026", cover:"s8-COPERTINA"},
+  {n:9,  title:"Under the Umbracle",      place:"Valencia, Spain",           date:"10/2026", cover:"s9-COPERTINA"},
+  {n:10, title:"Lunch Above the Sea",     place:"Sorrento, Italy",  date:"09/2026", cover:"s10-COPERTINA", crop:true},
+  {n:11, title:"Douro at Dusk",           place:"Porto, Portugal",           date:"09/2026", cover:"s11-COPERTINA", crop:true},
+  {n:12, title:"Rabelo Boats",            place:"Porto, Portugal",           date:"09/2026", cover:"s12-COPERTINA"},
+  {n:13, title:"Falling Water",           place:"Madeira, Portugal",         date:"09/2026", cover:"s13-COPERTINA"},
+  {n:14, title:"Banana Lane",             place:"Madeira, Portugal",         date:"09/2026", cover:"s14-COPERTINA"},
+  {n:15, title:"Atlantic Pools",          place:"Madeira, Portugal",         date:"09/2026", cover:"s15-COPERTINA", crop:true},
+  {n:16, title:"Cable Car to the Sea",    place:"Madeira, Portugal",         date:"09/2026", cover:"s16-COPERTINA", crop:true},
+  {n:17, title:"Lava Pools",              place:"Porto Moniz, Madeira",      date:"09/2026", cover:"s17-COPERTINA", crop:true},
+  {n:18, title:"Straw Umbrellas",         place:"Alicante, Spain",             date:"08/2026", cover:"s18-COPERTINA"},
+  {n:19, title:"Red on the Rocks",        place:"Alicante, Spain",         date:"07/2026", cover:"s19-COPERTINA"},
+  {n:20, title:"Doughnut Float",          place:"Alicante, Spain",             date:"07/2026", cover:"s20-COPERTINA"},
+  {n:21, title:"Sunset Audience",         place:"Sorrento, Italy",           date:"06/2026", cover:"s21-COPERTINA", crop:true},
+  {n:24, title:"Blue Hour Portrait",      place:"Cartagena, Spain",       date:"05/2026", cover:"s24-COPERTINA", crop:true},
+  {n:25, title:"Low Tide",                place:"Ibiza, Spain",          date:"04/2026", cover:"s25-COPERTINA", crop:true},
+  {n:26, title:"Corricella",              place:"Ibiza, Spain",            date:"04/2026", cover:"s26-COPERTINA"},
+  {n:27, title:"Lunch by the Rock",       place:"Sorrento, Italy",       date:"12/2025", cover:"s27-COPERTINA"},
+  {n:28, title:"Vesuvius from the Rocks", place:"Naples, Italy",             date:"12/2025", cover:"s28-COPERTINA", crop:true},
+  {n:29, title:"Open Door",               place:"Alicante, Spain",            date:"10/2025", cover:"s29-COPERTINA"},
+  {n:30, title:"Tram 28",                 place:"Lisbon, Portugal",          date:"08/2025", cover:"s30-COPERTINA", crop:true},
+  {n:31, title:"The Fisherman",           place:"Alicante, Spain", date:"10/2025", cover:"s31-COPERTINA", crop:true}
+].map(s => { const all = PHOTOS[s.n]; const c = all.find(p => p.f === s.cover);
+  return Object.assign(s, {photos:[c].concat(all.filter(p => p !== c))}); });
+const src = f => "img/" + f + ".jpg", thumb = f => "img/" + f + "-t.jpg", xl = f => "img/" + f + "-xl.jpg";
+/* sets 1-3 sit in the large 2-column and full-width slots: they get a sharp crop made for that shape */
+const coverSrc = s => s.crop ? "img/cover-" + s.n + ".jpg" : xl(s.cover);
+const $ = id => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const store = { get(k){ try { return sessionStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { sessionStorage.setItem(k,v); } catch(e){} } };
+
+/* ---------- Home: covers with a preview of the set ---------- */
+let pendingIndex = null;
+document.querySelectorAll(".row").forEach(row => {
+  row.dataset.sets.split(",").forEach(i => {
+    const s = SETS.find(x => x.n === +i), art = el("article", "cover");
+    const a = el("a", "cover-link"); a.href = "#set-" + s.n;
+    const img = el("img"); img.alt = s.title + ", " + s.place; img.loading = "lazy";
+    let pic = img, so = null;
+    if (s.crop) { pic = el("picture"); so = el("source"); so.media = "(max-width: 700px)"; pic.append(so, img); }
+    /* "main" is the photo shown large. A click on a thumbnail swaps it with the main one and the page stays on the home;
+       a click on the large photo opens the set. */
+    const coverP = s.photos[0]; let main = coverP;
+    const big = p => p === coverP ? coverSrc(s) : xl(p.f);
+    const paint = p => { img.src = big(p); if (so) so.srcset = xl(p.f); };
+    paint(main);
+    const cap = el("div", "cap");
+    cap.append(el("span", "place", s.place), el("h2", null, s.title), el("span", "date", s.date));
+    a.append(pic, cap);
+    const strip = el("div", "strip");
+    s.photos.slice(1, 6).forEach(p0 => {
+      let p = p0;
+      const b = el("button", "thumb"); b.type = "button";
+      const t = el("span", "tpic"); t.style.backgroundImage = "url(img/strip-" + s.n + ".jpg)"; b.append(t);
+      const label = () => { const i = s.photos.indexOf(p); t.style.backgroundSize = (s.photos.length * 100) + "% 100%"; t.style.backgroundPosition = (s.photos.length > 1 ? i / (s.photos.length - 1) * 100 : 0) + "% 0"; b.setAttribute("aria-label", "Show photo " + (s.photos.indexOf(p) + 1) + " of " + s.title + " as the main photo"); };
+      label();
+      b.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") img.src = big(p); });
+      b.addEventListener("click", () => { const prev = main; main = p; p = prev; label(); paint(main); });
+      strip.append(b);
+    });
+    const rest = s.photos.length - 6;
+    if (rest > 0) strip.append(el("span", "plus", "+" + rest));
+    strip.addEventListener("pointerleave", () => paint(main));
+    art.append(a, strip); row.append(art);
+  });
+});
+
+/* ---------- Set page + lightbox ---------- */
+let current = null, lbIndex = 0;
+function showSet(i) {
+  const s = SETS[i]; current = s;
+  $("set-title").textContent = s.title;
+  $("set-meta").textContent = s.place + " · " + s.date + " · " + s.photos.length + " photographs";
+  const box = $("photos"); box.textContent = "";
+  s.photos.forEach((p, k) => {
+    const b = el("button", "photo"); b.type = "button"; b.setAttribute("aria-label", "Enlarge photo " + (k + 1));
+    const im = el("img"); im.src = src(p.f); im.srcset = src(p.f) + " " + p.w + "w, " + xl(p.f) + " " + p.xw + "w"; im.sizes = "(max-width: 760px) 100vw, 50vw"; im.width = p.xw; im.height = p.xh; im.decoding = "async"; im.alt = s.title + ", photo " + (k + 1); im.loading = k < 3 ? "eager" : "lazy";
+    b.append(im); b.addEventListener("click", () => openLb(k)); box.append(b);
+  });
+  const nx = SETS[(i + 1) % SETS.length]; $("set-next").href = "#set-" + nx.n; $("set-next").textContent = "Next: " + nx.title + " →";
+  $("home").hidden = true; $("set").hidden = false; window.scrollTo(0, 0);
+  if (pendingIndex != null) { openLb(pendingIndex); pendingIndex = null; }
+}
+function hideSet() { current = null; closeLb(); $("set").hidden = true; $("home").hidden = false; }
+let lbFull = false, idleTimer = 0;
+function wake() { const lb = $("lightbox"); lb.classList.remove("idle"); clearTimeout(idleTimer); idleTimer = setTimeout(() => lb.classList.add("idle"), 2500); }
+function openLb(k) { lbIndex = k; drawLb(); const lb = $("lightbox"); lb.hidden = false; $("lb-close").focus({preventScroll: true}); wake();
+  /* real fullscreen where the browser allows it; otherwise the black overlay already fills the window */
+  try { if (lb.requestFullscreen && !document.fullscreenElement) lb.requestFullscreen().then(() => { lbFull = true; }, () => {}); } catch (e) {} }
+function closeLb() { $("lightbox").hidden = true; clearTimeout(idleTimer);
+  if (lbFull && document.fullscreenElement) { lbFull = false; document.exitFullscreen().catch(() => {}); } }
+document.addEventListener("fullscreenchange", () => { if (!document.fullscreenElement && lbFull) { lbFull = false; closeLb(); } });
+$("lightbox").addEventListener("pointermove", wake);
+/* a click on the black area around the photo closes the view */
+document.querySelector(".lb-stage").addEventListener("click", e => { if (e.target === e.currentTarget) closeLb(); });
+function drawLb() { const p = current.photos[lbIndex]; $("lb-img").src = xl(p.f);
+  const nx = current.photos[(lbIndex + 1) % current.photos.length]; new Image().src = xl(nx.f); $("lb-img").alt = current.title + ", photo " + (lbIndex + 1);
+  $("lb-count").textContent = current.title + " · " + (lbIndex + 1) + " / " + current.photos.length; }
+function moveLb(d) { if (!current) return; lbIndex = (lbIndex + d + current.photos.length) % current.photos.length; drawLb(); }
+$("lb-prev").addEventListener("click", () => moveLb(-1));
+$("lb-next").addEventListener("click", () => moveLb(1));
+$("lb-close").addEventListener("click", closeLb);
+/* swipe left/right to change photo, swipe down to close; the photo follows the finger */
+(() => { const im = $("lb-img"); let x0 = 0, y0 = 0, dx = 0, dy = 0, on = false, busy = false;
+  const set = (x, t) => { im.style.transition = t ? "transform " + t + "ms ease-out, opacity " + t + "ms" : "none"; im.style.transform = x ? "translateX(" + x + "px)" : ""; };
+  im.addEventListener("touchstart", e => { if (busy || e.touches.length > 1) return; on = true; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; dx = dy = 0; set(0); }, {passive: true});
+  im.addEventListener("touchmove", e => { if (!on) return; dx = e.touches[0].clientX - x0; dy = e.touches[0].clientY - y0; if (Math.abs(dx) > Math.abs(dy)) set(dx); }, {passive: true});
+  const end = () => { if (!on) return; on = false; const w = window.innerWidth;
+    if (dy > 110 && Math.abs(dy) > Math.abs(dx) * 1.5) { set(0); closeLb(); return; }
+    if (Math.abs(dx) > Math.min(70, w * .18) && Math.abs(dx) > Math.abs(dy)) { const dir = dx < 0 ? 1 : -1; busy = true; set(-dir * w, 160);
+      setTimeout(() => { moveLb(dir); set(dir * w * .35); im.style.opacity = "0"; requestAnimationFrame(() => requestAnimationFrame(() => { set(0, 180); im.style.opacity = "1"; setTimeout(() => { busy = false; }, 190); })); }, 160); }
+    else set(0, 160); };
+  im.addEventListener("touchend", end); im.addEventListener("touchcancel", end); })();
+$("lb-img").addEventListener("click", e => { const r = e.currentTarget.getBoundingClientRect(); moveLb(e.clientX < r.left + r.width / 3 ? -1 : 1); wake(); });
+
+let homeScroll = 0;
+function route() {
+  const h = location.hash.slice(1), m = h.match(/^set-(\d+)$/), legal = h === "privacy" || h === "cookies";
+  const wasLegal = !$("legal").hidden;
+  document.documentElement.classList.toggle("legal", legal);
+  $("legal").hidden = !legal; $("privacy-doc").hidden = h !== "privacy"; $("cookies-doc").hidden = h !== "cookies";
+  if (legal) { hideSet(); $("home").hidden = true; window.scrollTo(0, 0); return; }
+  if (wasLegal) requestAnimationFrame(fit);
+  const si = m ? SETS.findIndex(x => x.n === +m[1]) : -1;
+  if (si >= 0) { if (!$("set").hidden === false && !$("home").hidden) homeScroll = window.scrollY; showSet(si); return; }
+  const wasSet = !$("set").hidden || wasLegal; hideSet();
+  const target = h && document.getElementById(h);
+  if (wasSet && (h === "work" || !h)) window.scrollTo(0, homeScroll); else if (target) target.scrollIntoView(); else if (wasSet) window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", route);
+$("more").addEventListener("click", () => { const next = document.querySelector("#more-rows .batch[hidden]"); if (!next) return;
+  next.hidden = false; next.scrollIntoView({behavior: "smooth", block: "start"});
+  if (!document.querySelector("#more-rows .batch[hidden]")) $("more").parentElement.hidden = true; });
+$("mark").addEventListener("click", () => { if (location.hash && location.hash !== "#work") location.hash = "work"; else window.scrollTo(0, 0); });
+
+/* ---------- Leaderboard ---------- */
+const LB_KEY = "allllleria-leaderboard";
+let scores = [], lbMode = "local", db = null, uid = null;
+function renderScores() {
+  const board = $("board"), mini = $("mini"); board.textContent = ""; mini.textContent = "";
+  if (!scores.length) { const li = el("li"); li.style.display = "block"; li.append(el("span", "empty", "No scores yet. First place is open.")); board.append(li);
+    mini.append(el("li", null, "Empty")); return; }
+  scores.slice(0, 10).forEach((s, i) => { const li = el("li"); li.append(el("span", "pos", String(i + 1)), el("span", "who", s.name), el("span", null, String(s.score))); board.append(li); });
+  scores.slice(0, 3).forEach(s => { const li = el("li"); li.append(el("span", null, s.name), el("span", null, String(s.score))); mini.append(li); });
+}
+function loadLocal() { try { scores = JSON.parse(localStorage.getItem(LB_KEY) || "[]"); } catch(e) { scores = []; }
+  $("board-note").textContent = "For now this leaderboard is saved on this device only. A shared one is coming soon."; renderScores(); }
+async function initBoard() {
+  loadLocal();
+  try {
+    const c = window.claude; if (!c || !c.use) return;
+    const [d, u] = await Promise.all([c.use("db"), c.use("user")]); if (!d) return;
+    uid = u ? await u.id() : null; db = d; lbMode = "shared";
+    $("board-note").textContent = "Loading the leaderboard…";
+    const slow = setTimeout(() => { $("board-note").textContent = "The leaderboard is not answering yet. Try again in a moment."; }, 10000);
+    db.collection("scores").orderBy("score", "desc").limit(10).onSnapshot(snap => {
+      scores = snap.docs.map(x => x.data()).filter(x => x && typeof x.score === "number").map(x => ({name: String(x.name || "Anonymous").slice(0, 24), score: x.score}));
+      if (!snap.metadata.fromCache) { clearTimeout(slow); $("board-note").textContent = "Shared by everyone who opens this page. One score each: your best one stays."; }
+      renderScores();
+    }, () => { clearTimeout(slow); lbMode = "local"; loadLocal(); });
+  } catch(e) { lbMode = "local"; }
+}
+async function saveScore(name, score) {
+  if (lbMode === "shared" && db && uid) {
+    const ref = db.doc("scores/" + uid), old = await ref.get();
+    if (old.exists && (old.data().score || 0) >= score) { await ref.update({name}); return "Your record is still " + old.data().score + ". Name updated."; }
+    await ref.set({name, score, at: Date.now()}); return "Saved. You are on the leaderboard with " + score + ".";
+  }
+  let list; try { list = JSON.parse(localStorage.getItem(LB_KEY) || "[]"); } catch(e) { list = []; }
+  list = list.filter(x => x.name !== name || x.score > score);
+  if (!list.some(x => x.name === name)) list.push({name, score});
+  list.sort((a, b) => b.score - a.score); list = list.slice(0, 10);
+  try { localStorage.setItem(LB_KEY, JSON.stringify(list)); } catch(e) {}
+  scores = list; renderScores(); return "Saved on this device. You are on the leaderboard with " + score + ".";
+}
+
+/* ---------- The game: number 10 dribbles past the defenders ---------- */
+const cv = $("pitch"), cx = cv.getContext("2d");
+const H = 220, GROUND = 190, S = 3, NEED = 5;
+/* phones get a narrower, zoomed-in pitch: same sprites, fewer logical pixels across */
+let W = 720, PX = 96;
+function setPitch() { const small = window.matchMedia("(max-width: 700px)").matches; W = small ? 400 : 720; PX = small ? 34 : 96; }
+const PAL = {h:"#16130f", H:"#4b3f34", s:"#dba77c", a:"#12a0d7", w:"#ffffff", k:"#16130f", b:"#16130f", e:"#16130f", y:"#f2c230", c:"#e2a857", r:"#d9351c", g:"#1d4526"};
+const BODY = [
+  "...hh.hhh.hh.h..",
+  "..hhhhhhhhhhhhh.",
+  ".hhHhhhHhhhHhhhh",
+  ".hhhhHhhhHhhhHh.",
+  ".hHhhhhhsssssh..",
+  ".hhhHhhsssessh..",
+  ".hhhhhhsssssss..",
+  "..hHhhsssssss...",
+  "..hh.hhsssss....",
+  ".......sss......",
+  "...aaaaaaaaaa...",
+  ".saaawawwwaaas..",
+  ".saaawawawaaas..",
+  ".saaawawawaaas..",
+  "..aaawawawaaa...",
+  "..aaawawwwaaa...",
+  "...aaaaaaaaa....",
+  "...wwwwwwww.....",
+  "...wwwwwwww....."];
+const LEGS = [
+  ["...ss....ss.....", "..ss......ss....", "..aa......aa....", ".bbb......bbb..."],
+  [".....ssss.......", ".....ssss.......", ".....aaaa.......", "....bbbbb......."]];
+const DEF = [
+  "................",
+  "................",
+  "................",
+  ".....hhhhhh.....",
+  "....hhhhhhhh....",
+  "....hhhsssss....",
+  "....hhssseSs....",
+  "....hsssssss....",
+  ".....ssssss.....",
+  ".......sss......",
+  "...kwkwkwkwkw...",
+  ".sskwkwkwkwkwss.",
+  ".sskwkwkwkwkwss.",
+  ".s.kwkwkwkwkw.s.",
+  "...kwkwkwkwkw...",
+  "...kwkwkwkwkw...",
+  "...kwkwkwkwkw...",
+  "...kkkkkkkkkk...",
+  "...kkkkkkkkkk...",
+  "....ss...ss.....",
+  "....ss...ss.....",
+  "....ww...ww.....",
+  "...bbb..bbb....."];
+const SLIDE = [
+  "..............hhhh....",
+  ".............hhhhhh...",
+  ".............ssshhh...",
+  ".............sssshh...",
+  "..........kwkwkss.....",
+  "........kwkwkwkw..s...",
+  "bb...kkkkwkwkwk..ss...",
+  "bbsskkkkkkwkw.........",
+  "bbsssskkk.............",
+  "....ss..ssssbb........",
+  "..............bb......"];
+const KEEP = [
+  "..ss........ss..", "..ss........ss..", "..yy........yy..", "..yy........yy..", "..yy........yy..", "..yy.hhhhhh.yy..", "..yyhhhhhhhhyy..", "..yyhhhsssssyy..",
+  "...yhhssseSsy...", "...yhsssssssy...", "...yy.sssss.yy..", "...yyy.sss.yyy..", "...yyyyyyyyyy...", "...yyyyyyyyyy...", "...yyyyyyyyyy...", "...yyyyyyyyyy...",
+  "...yyyyyyyyyy...", "...yyyyyyyyyy...", "...yyyyyyyyyy...", "...kkkkkkkkkk...", "...kkkkkkkkkk...", "....ss...ss.....", "....ss...ss.....", "....ss...ss.....",
+  "....yy...yy.....", "....yy...yy.....", "...bbb..bbb....."];
+const PIZ = ["...cccc...", "..crrrrc..", ".crwrrgrc.", "crrrrrwrrc", "crgrwrrrrc", "crrrrrgrrc", "crwrrrrwrc", ".crrgrrrc.", "..crrrrc..", "...cccc..."];
+/* ---------- Gulf of Naples landmarks (pixel heightmaps, 1 cell = 3 px) ---------- */
+function landmark(w, h, paint) {
+  const g = Array.from({length: h}, () => Array(w).fill("."));
+  const put = (x, y, ch) => { x = Math.round(x); y = Math.round(y); if (x >= 0 && x < w && y >= 0 && y < h) g[h - 1 - y][x] = ch; };
+  const col = (x, top, ch) => { for (let y = 0; y < Math.round(top); y++) put(x, y, ch || "m"); };
+  const rect = (x0, y0, rw, rh, ch) => { for (let x = x0; x < x0 + rw; x++) for (let y = y0; y < y0 + rh; y++) put(x, y, ch); };
+  const prof = pts => x => { for (let i = 1; i < pts.length; i++) if (x <= pts[i][0]) { const [a, ha] = pts[i - 1], [b, hb] = pts[i]; return ha + (hb - ha) * (x - a) / (b - a); } return 0; };
+  paint(put, col, rect, prof);
+  return g.map(r => r.join(""));
+}
+const LAND_ROWS = [
+  ["Vesuvio", landmark(88, 41, (put, col) => {
+    for (let x = 0; x < 88; x++) { const somma = 27 - Math.abs(x - 25) * 1.15 - (x % 5 === 0 ? 1 : 0); let cone = 33 - Math.abs(x - 52) * .95; if (cone > 30) cone = Math.abs(x - 52) < 2 ? 29 : 30; col(x, Math.max(0, somma, cone)); }
+    [[53,31],[54,32],[54,33],[55,33],[55,34],[56,34],[56,35],[57,35],[57,36],[58,36],[58,37],[59,37],[60,38],[59,38],[61,39],[60,39],[62,40]].forEach(([x, y]) => put(x, y, "o"));
+  })],
+  ["Pompei", landmark(86, 23, (put, col, rect) => {
+    for (let x = 0; x < 86; x++) col(x, x < 3 ? x + 1 : x > 82 ? 85 - x : 3);
+    [[8,17],[14,18],[20,11],[26,18],[32,18],[38,8],[44,15]].forEach(([x, h]) => { rect(x, 3, 2, h - 3, "m");
+      if (h >= 17) rect(x - 1, h, 4, 1, "m"); else { put(x, h, "m"); } });
+    rect(25, 19, 10, 2, "m"); put(28, 21, "m"); put(29, 21, "m");
+    rect(56, 3, 18, 17, "m");
+    for (let x = 60; x < 70; x++) for (let y = 3; y < 17; y++) if (y < 12 || (x - 64.5) ** 2 + (y - 12) ** 2 < 24) put(x, y, ".");
+    for (let x = 57; x < 73; x += 3) for (let y = 5; y < 19; y += 4) if (x < 60 || x > 69 || y > 16) put(x, y, "d");
+    rect(48, 3, 4, 2, "d"); rect(77, 3, 3, 2, "d");
+  })],
+  ["Sorrento", landmark(84, 33, (put, col, rect) => {
+    for (let x = 0; x < 84; x++) col(x, x < 6 ? x * 3 : x > 78 ? Math.max(0, 16 - (x - 78) * 3) : 16);
+    for (let x = 6; x < 78; x += 3) for (let y = 2; y < 15; y += 2) if ((x * 3 + y * 5) % 11 < 3) put(x, y, "d");
+    [[7,6,6],[14,5,9],[20,7,5],[28,6,8],[35,5,4],[47,6,7],[54,7,6],[62,6,9],[69,6,6],[75,3,4]].forEach(([x0, w, h]) => { rect(x0, 16, w, h, "m"); for (let x = x0 + 1; x < x0 + w - 1; x += 2) for (let y = 18; y < 16 + h - 1; y += 3) put(x, y, "w"); });
+    rect(41, 16, 3, 14, "m"); put(42, 30, "m"); put(42, 31, "m"); put(42, 27, "w");
+  })],
+  ["Costiera Amalfitana", landmark(96, 42, (put, col, rect, prof) => {
+    const h = prof([[0, 0], [4, 5], [10, 10], [24, 17], [36, 22], [48, 30], [58, 34], [66, 40], [74, 37], [82, 24], [90, 9], [95, 0]]);
+    for (let x = 0; x < 96; x++) col(x, h(x) + (x % 7 === 3 && h(x) > 4 ? 1 : 0));
+    for (let x = 5; x < 56; x += 4) { const top = h(x) - 4; for (let y = 2; y < top; y += 4) if ((x * 7 + y * 3) % 5 < 3) { rect(x, y, 3, 3, "d"); put(x + 1, y + 1, "w"); } }
+    rect(20, 2, 6, 7, "d"); for (let x = 20; x < 26; x++) put(x, 9 + (x > 21 && x < 24 ? 1 : 0), "d"); put(22, 11, "d"); put(23, 11, "d"); put(22, 5, "w"); put(23, 5, "w");
+  })],
+  ["Capri", landmark(96, 31, (put, col, rect, prof) => {
+    const h = prof([[0, 0], [3, 7], [6, 18], [9, 26], [15, 30], [22, 24], [38, 12], [50, 18], [58, 22], [63, 15], [67, 5], [69, 0]]);
+    for (let x = 0; x < 70; x++) col(x, h(x));
+    for (let x = 72; x < 79; x++) col(x, x === 72 || x === 78 ? 3 : x === 73 || x === 77 ? 13 : 15);
+    for (let x = 80; x < 88; x++) col(x, x === 80 || x === 87 ? 3 : x === 81 || x === 86 ? 10 : 12);
+    rect(83, 0, 2, 5, ".");
+    for (let x = 90; x < 95; x++) col(x, x === 90 || x === 94 ? 2 : x === 92 ? 9 : 7);
+  })],
+  ["Stadio Maradona", landmark(100, 33, (put, col, rect) => {
+    for (let x = 0; x < 100; x++) { const u = (x - 49.5) / 46; col(x, Math.abs(u) >= 1 ? 0 : Math.min(17, Math.round(23 * Math.sqrt(1 - u * u)))); }
+    rect(9, 17, 82, 3, "m");
+    for (let x = 11; x < 90; x += 5) { rect(x, 20, 1, 3, "m"); }
+    rect(10, 23, 80, 1, "m");
+    for (let y = 4; y < 16; y += 4) for (let x = 6; x < 94; x++) if ((x + y) % 9 > 1) put(x, y, "d");
+    [16, 34, 52, 70, 84].forEach(x => rect(x, 0, 3, 3, "w"));
+    [3, 96].forEach(x => { rect(x, 0, 1, 28, "m"); rect(x - 2, 28, 5, 4, "m"); for (let i = -1; i <= 1; i++) { put(x + i, 29, "w"); put(x + i, 30, "w"); } });
+  })]
+];
+const DAYC = {m: "#ebe6de", d: "#dfd8cc", w: "#ffffff", o: "#e4dfd7"}, NIGHTC = {m: "#3a7748", d: "#336f41", w: "#2f6b3a", o: "#467f53"}, REDC = {m: "#e14d35", d: "#dc4029", w: "#d9351c", o: "#e6624c"}, HELLC = {m: "#251109", d: "#33160c", w: "#ff7a1a", o: "#3d1a10"};
+function sprite(rows, extra, flip) {
+  const n = Math.max.apply(null, rows.map(r => r.length)); rows = rows.map(r => r.padEnd(n, "."));
+  const c = document.createElement("canvas"); c.width = n * S; c.height = rows.length * S; const g = c.getContext("2d");
+  rows.forEach((r, y) => { for (let x = 0; x < n; x++) { let ch = r[x]; if (ch === ".") continue; if (ch === "S") ch = "s"; g.fillStyle = (extra && extra[ch]) || PAL[ch]; g.fillRect((flip ? n - 1 - x : x) * S, y * S, S, S); } });
+  return c;
+}
+const HERO = LEGS.map(l => sprite(BODY.concat(l)));
+/* in hell the same player, with the curls a shade lighter so they read on black */
+const HERO_HELL = LEGS.map(l => sprite(BODY.concat(l), {h: "#5a4434", H: "#7d6450"}));
+const HH = HERO[0].height;
+const SKINS = ["#dba77c", "#b9825a", "#f0c9a4"];
+const DEFS = SKINS.map(s => sprite(DEF, {s}, true)), SLIDES = SKINS.map(s => sprite(SLIDE, {s})), KEEPER = sprite(KEEP, null, true), PIZZA = sprite(PIZ);
+const AIR_TOP = GROUND - 66 - 34 - 30;
+/* ---------- Hell mode (100+): the Juventus players come back as skeletons ---------- */
+const BONE = {q: "#f2efe6", y: "#f2c230"};
+const SKEL_DEF = sprite([
+  "................", "................", "................", ".....qqqqqq.....", "....qqqqqqqq....", "....qqqqqqqq....", "....qq.qq.qq....", "....qqqqqqqq....",
+  ".....q.q.q......", "......qqqq......", ".......qq.......", "...qqqqqqqqqq...", "..q..qqqqqq..q..", ".q...q.qq.q...q.", ".q...qqqqqq...q.", ".q...q.qq.q...q.",
+  "..q..qqqqqq..q..", ".......qq.......", ".....qqqqqq.....", ".....q....q.....", ".....q....q.....", ".....q....q.....", "....qq...qq....."], BONE, true);
+const SKEL_SLIDE = sprite([
+  "..............qqqq....", ".............qqqqqq...", ".............q.qq.q...", ".............qqqqqq...", "..............q.q.....", "..........qqqqq.......",
+  "........q.q.q.q..q....", "qq...qqqqqqqqqq.qq....", "qq.qqq..q.q...........", "....qq..qqqqqq........", "..............qq......"], BONE);
+const SKEL_KEEPER = sprite([
+  "..yy........yy..", "..yy........yy..", "...q........q...", "...q........q...", "...q........q...", "...q.qqqqqq.q...", "...qqqqqqqqqq...", "....qq.qq.qq....",
+  "....qqqqqqqq....", ".....q.q.q......", "......qqqq......", ".......qq.......", "...qqqqqqqqqq...", ".....qqqqqq.....", ".....q.qq.q.....", ".....qqqqqq.....",
+  ".....q.qq.q.....", ".....qqqqqq.....", ".......qq.......", ".......qq.......", ".....qqqqqq.....", ".....q....q.....", ".....q....q.....", ".....q....q.....",
+  ".....q....q.....", ".....q....q.....", "....qq...qq....."], BONE, true);
+const FIRE = sprite(["...ffff...", "..fyyyyf..", ".fyyWWyyf.", "fyyWWWWyyf", "fyWWWWWWyf", "fyyWWWWyyf", ".fyyWWyyf.", "..fyyyyf..", "...ffff...", "....ff...."], {f: "#d9351c", y: "#ff9a1f", W: "#ffe9a8"});
+/* lava: a 64x24 pixel tile whose waves repeat every 64 px, so it scrolls without a seam */
+const LAVA = (() => { const c = document.createElement("canvas"); c.width = 64; c.height = 24; const g = c.getContext("2d");
+  for (let x = 0; x < 64; x++) { const top = 4 + Math.round(1.6 * Math.sin(Math.PI * 2 * x / 32));
+    for (let y = top; y < 24; y++) { const d = y - top, band = (y + Math.round(2 * Math.sin(Math.PI * 2 * x / 16 + y * .7))) % 6 === 0;
+      g.fillStyle = d < 1 ? "#ffd23f" : d < 3 ? "#ffb02e" : band ? "#ffb02e" : d < 9 ? "#ff7a1a" : y % 5 === 0 && x % 9 < 4 ? "#ff7a1a" : "#ff5a14"; g.fillRect(x, y, 1, 1); } }
+  for (const [x, y] of [[6, 1], [21, 2], [40, 0], [52, 2]]) { g.fillStyle = "#ff9a1f"; g.fillRect(x, y, 1, 1); }
+  return c; })();
+$("lava").style.backgroundImage = "url(" + LAVA.toDataURL() + ")";
+const LANDS = LAND_ROWS.map(([name, rows]) => ({name, day: sprite(rows, DAYC), night: sprite(rows, NIGHTC), red: sprite(rows, REDC), hell: sprite(rows, HELLC)}));
+let st = null, best = 0, unlocked = false, raf = 0, last = 0, overAt = 0;
+function reset() { st = {mode:"ready", y:0, vy:0, speed:5.2, score:0, defs:[], next:420, dist:0, embers:[], bg:[], bag:[], bgNext: 300 + Math.random() * 200}; st.bg.push({x: Math.round(W * .42), k: nextLand()}); }
+/* landmarks come out of a shuffled bag: random order, every one shown before any repeats, never the same twice in a row */
+let lastLand = -1;
+function nextLand() {
+  if (!st.bag.length) { const b = LANDS.map((_, i) => i); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; }
+    if (b[b.length - 1] === lastLand) [b[0], b[b.length - 1]] = [b[b.length - 1], b[0]]; st.bag = b; }
+  return lastLand = st.bag.pop();
+}
+function spawn(offset, groundOnly) {
+  const n = st.score, k = Math.floor(Math.random() * 3), r = Math.random(), x = W + 20 + (offset || 0), rush = n >= 15 ? Math.random() * 2.4 : 0;
+  if (!groundOnly && n >= 15) {
+    /* second half: flying pizzas (stay on the ground) and fast stray balls */
+    if (r < (n >= 25 ? .26 : .18)) { st.defs.push({x: x + 60, w: 30, h: 30, v: .5, img: PIZZA, himg: FIRE, air: true}); return "air"; }
+    if (r < (n >= 25 ? .46 : .34)) { st.defs.push({x: x + 220, w: 16, h: 16, v: 4.2, ball: true}); return "ball"; }
+    if (n >= 20 && r > .8) { st.defs.push({x, w: KEEPER.width, h: KEEPER.height - 9, v: .5, img: KEEPER, himg: SKEL_KEEPER}); return "keeper"; }
+  }
+  const low = Math.random() < .38;
+  st.defs.push(low ? {x, w: SLIDES[k].width, h: SLIDES[k].height, v: 1.6 + rush, img: SLIDES[k], himg: SKEL_SLIDE} : {x, w: DEFS[k].width, h: DEFS[k].height - 9, v: .5 + rush, img: DEFS[k], himg: SKEL_DEF});
+  return "def";
+}
+function step(dt) {
+  if (st.score >= 100) { if (Math.random() < .35 * dt) st.embers.push({x: Math.random() * W, y: GROUND + 4, vy: -.4 - Math.random() * .8, life: 70 + Math.random() * 90});
+    for (const e of st.embers) { e.y += e.vy * dt; e.x += Math.sin((e.y + e.life) / 14) * .4 * dt; e.life -= dt; } st.embers = st.embers.filter(e => e.life > 0); }
+  /* landmarks drift by slowly behind the pitch, like the clouds in the offline dinosaur game */
+  const drift = st.speed * .25 * dt; st.bgNext -= drift;
+  for (const b of st.bg) b.x -= drift;
+  if (st.bgNext <= 0) { const k = nextLand(); st.bg.push({x: W + 10, k}); st.bgNext = LANDS[k].day.width + 160 + Math.random() * 320; }
+  st.bg = st.bg.filter(b => b.x > -LANDS[b.k].day.width - 10);
+  st.dist += st.speed * dt; st.vy += .68 * dt; st.y += st.vy * dt; if (st.y > 0) { st.y = 0; st.vy = 0; }
+  st.next -= st.speed * dt;
+  if (st.next <= 0) { const n = st.score, hard = Math.max(0, n - 15), kind = spawn(0);
+    if (kind === "def" && n >= 7 && Math.random() < (n >= 15 ? .45 : .22)) spawn(74, true);
+    /* gap = one jump (37 frames) + reaction time, which shrinks as the score grows */
+    const react = n < 15 ? 34 - n * .6 : Math.max(8, 24 - hard * 1.3), extra = n < 15 ? 260 : Math.max(40, 240 - hard * 18);
+    st.next = (st.speed + 1) * (37 + react) + Math.random() * extra; }
+  const top = GROUND - HH + st.y + 12, bottom = GROUND + st.y;
+  for (const d of st.defs) {
+    d.x -= (st.speed + d.v) * dt;
+    if (!d.passed && d.x + d.w < PX) { d.passed = true; st.score++; st.speed = st.score <= 15 ? 5.2 + st.score * .2 : Math.min(14.5, 8.2 + (st.score - 15) * .36); onScore(); }
+    const ins = d.air || d.ball ? 4 : 10, oy1 = d.air ? AIR_TOP + 5 : GROUND - d.h + 8, oy2 = d.air ? AIR_TOP + 25 : GROUND;
+    if (d.x + ins < PX + 38 && d.x + d.w - ins > PX + 10 && bottom > oy1 && top < oy2) { gameOver(); return; }
+  }
+  st.defs = st.defs.filter(d => d.x > -90);
+}
+function ball(bx, by) { cx.fillStyle = st && st.score >= 100 ? "#ffffff" : "#16130f"; cx.fillRect(bx - 7, by - 7, 14, 14); cx.fillStyle = "#fff"; cx.fillRect(bx - 5, by - 5, 10, 10); cx.fillStyle = "#16130f"; cx.fillRect(bx - 2, by - 2, 4, 4); }
+function draw() {
+  cx.setTransform(cv.width / W, 0, 0, cv.height / H, 0, 0); cx.imageSmoothingEnabled = false;
+  const hell = st.score >= 100, red = st.score >= 50 && !hell, night = st.score >= 15 && st.score < 50, dark = night || red || hell, fg = dark ? "#ffffff" : "#16130f";
+  cx.fillStyle = hell ? "#0b0807" : red ? "#d9351c" : night ? "#2f6b3a" : "#ffffff"; cx.fillRect(0, 0, W, H);
+  if (hell) { const gl = cx.createLinearGradient(0, GROUND - 110, 0, GROUND); gl.addColorStop(0, "rgba(217,53,28,0)"); gl.addColorStop(1, "rgba(217,53,28,.35)"); cx.fillStyle = gl; cx.fillRect(0, GROUND - 110, W, 110); }
+  for (const b of st.bg) { const L = LANDS[b.k], im = hell ? L.hell : red ? L.red : night ? L.night : L.day, x = Math.round(b.x); cx.drawImage(im, x, GROUND - im.height);
+    if (st.mode === "run") { cx.fillStyle = dark ? "rgba(255,255,255,.6)" : "#b3aca1"; cx.font = 'italic 500 12px "Bodoni Moda", Didot, serif'; cx.textAlign = "center"; cx.textBaseline = "bottom"; cx.fillText(L.name, x + im.width / 2, GROUND - im.height - 4); } }
+  if (hell) { const tw = 64 * (H - GROUND + 6) / 24, off = -((st.dist * .6) % tw); for (let x = off; x < W; x += tw) cx.drawImage(LAVA, Math.floor(x), GROUND - 5, Math.ceil(tw) + 1, H - GROUND + 6);
+    for (const e of st.embers) { cx.fillStyle = e.life > 40 ? "#ffd23f" : "#ff7a1a"; cx.fillRect(Math.round(e.x), Math.round(e.y), 3, 3); } }
+  else { cx.fillStyle = fg; cx.fillRect(0, GROUND, W, 2);
+  cx.fillStyle = red ? "#f6b9ac" : night ? "#9fd0a8" : "#2f6b3a"; for (let x = -(st.dist % 46); x < W; x += 46) { cx.fillRect(x, GROUND + 9, 10, 2); cx.fillRect(x + 22, GROUND + 17, 6, 2); } }
+  for (const d of st.defs) { if (d.ball) ball(Math.round(d.x) + 8, GROUND - 8); else if (d.air) cx.drawImage(hell && d.himg || d.img, Math.round(d.x), AIR_TOP + Math.round(Math.sin(st.dist / 30) * 3)); else { const im = hell && d.himg || d.img; cx.drawImage(im, Math.round(d.x), GROUND - im.height); } }
+  const run = st.mode === "run" && st.y === 0 ? Math.floor(st.dist / 22) % 2 : (st.y < 0 ? 1 : 0);
+  cx.drawImage((hell ? HERO_HELL : HERO)[run], PX, GROUND - HH + Math.round(st.y));
+  const bx = PX + 56, by = GROUND - 7 + Math.round(st.y * .85) - (st.mode === "run" ? Math.abs(Math.sin(st.dist / 16)) * 5 : 0);
+  ball(bx, by);
+  cx.fillStyle = fg; cx.textBaseline = "top"; cx.font = '700 17px "Bodoni Moda", Didot, serif';
+  cx.textAlign = "left"; cx.fillText(st.score >= NEED ? "Score " + st.score : "Score " + st.score + " / " + NEED, 12, 12);
+  cx.textAlign = "right"; cx.fillText(best ? "Best " + best : "", W - 12, 12);
+  if (st.mode !== "run") { cx.textAlign = "center"; cx.font = '700 22px "Bodoni Moda", Didot, serif';
+    cx.fillText(st.mode === "over" ? "Ball lost. Score: " + st.score : "Press space or tap to start", W / 2, 40);
+    if (st.mode === "over") { cx.font = '500 15px "Bodoni Moda", Didot, serif'; cx.fillText("Press space or tap to play again", W / 2, 70); } }
+  else if (st.banner && performance.now() < st.bannerUntil) { cx.textAlign = "center"; cx.font = '800 30px "Bodoni Moda", Didot, serif'; cx.fillText(st.banner, W / 2, 34); }
+}
+function loop(t) {
+  if (st.mode !== "run") return;
+  const dt = Math.max(0, Math.min(2.5, (t - last) / 16.667)); last = t; step(dt); draw();
+  if (st.mode === "run") raf = requestAnimationFrame(loop);
+}
+function setHell(on) { document.documentElement.classList.toggle("hell", on); }
+function start() { document.documentElement.classList.add("playing"); setHell(false); reset(); st.mode = "run"; $("score-form").hidden = true; $("btn-retry").hidden = true;
+  $("gate-status").textContent = unlocked ? "The website is open. Beat your best of " + best + "." : "Score " + NEED + " points to enter the website.";
+  $("save-note").textContent = "Press space or tap to jump over the defenders.";
+  last = performance.now(); cancelAnimationFrame(raf); raf = requestAnimationFrame(loop); }
+function press() { if (st.mode === "over" && performance.now() - overAt < 450) return;
+  if (st.mode !== "run") start(); else if (st.y === 0) st.vy = -12.6; }
+function unlock() { unlocked = true; $("btn-enter").hidden = false; }
+function onScore() { if (st.score > best) best = st.score;
+  if (!unlocked && st.score >= NEED) { unlock(); $("gate-status").textContent = NEED + " points. The website is open. Keep going to climb the leaderboard."; }
+  const ev = {15: ["SECOND HALF", "Second half. Stay on the ground when a pizza flies over, and watch for stray balls."], 20: ["KEEPERS ON", "Goalkeepers are taller: jump late."], 25: ["EXTRA TIME", "Extra time. Everything is faster."], 50: ["FIFTY", "50 points. The pitch turns red."], 100: ["HELL MODE", "100 points. Welcome to hell: the defenders are back as skeletons."]}[st.score];
+  if (st.score === 100) setHell(true);
+  if (ev) { st.banner = ev[0]; st.bannerUntil = performance.now() + 1900; $("save-note").textContent = ev[1]; } }
+function gameOver() { document.documentElement.classList.remove("playing"); st.mode = "over"; overAt = performance.now(); draw(); $("btn-retry").hidden = false;
+  if (unlocked) {
+    $("gate-status").textContent = "You scored " + st.score + ". Your best is " + best + ": you made the leaderboard.";
+    $("save-note").textContent = "Save your name, then play again to improve your score.";
+    $("score-form").hidden = false;
+  } else {
+    $("gate-status").textContent = "You scored " + st.score + ". Score " + NEED + " points to enter the website.";
+    $("save-note").textContent = "Play again: the website opens at " + NEED + " points.";
+  }
+  $("btn-retry").focus({preventScroll: true}); }
+function fit() { if (!st || st.mode !== "run") { setPitch(); if (st && st.mode === "ready") st.bg = [{x: Math.round(W * .42), k: st.bg.length ? st.bg[0].k : nextLand()}]; } const r = cv.getBoundingClientRect(), d = Math.min(2, window.devicePixelRatio || 1); cv.width = Math.max(360, Math.round(r.width * d)); cv.height = Math.round(cv.width * H / W); draw(); }
+$("gate").addEventListener("pointerdown", e => { if (e.target.closest("button, a, input, label, form")) return; if (e.target === cv) e.preventDefault(); press(); });
+window.addEventListener("keydown", e => {
+  const gateOpen = !document.documentElement.classList.contains("entered") && !document.documentElement.classList.contains("legal");
+  if (gateOpen && (e.code === "Space" || e.code === "ArrowUp") && document.activeElement.tagName !== "INPUT") { e.preventDefault(); if (!e.repeat) press(); return; }
+  if (!$("lightbox").hidden) { if (e.key === "Escape") closeLb(); else if (e.key === "ArrowRight") moveLb(1); else if (e.key === "ArrowLeft") moveLb(-1); }
+});
+window.addEventListener("keyup", e => { if (e.code === "Space" && !document.documentElement.classList.contains("entered") && document.activeElement.tagName === "BUTTON") e.preventDefault(); });
+window.addEventListener("resize", fit);
+$("btn-retry").addEventListener("click", start);
+$("score-form").addEventListener("submit", async e => {
+  e.preventDefault(); const name = $("nick").value.trim().replace(/\s+/g, " ").slice(0, 24);
+  if (!name) { $("save-note").textContent = "Type a name or nickname to join the leaderboard."; $("nick").focus(); return; }
+  $("btn-save").disabled = true;
+  try { $("save-note").textContent = (await saveScore(name, best)) + " Play again to improve it."; $("score-form").hidden = true; $("btn-retry").focus({preventScroll: true}); }
+  catch(err) { $("save-note").textContent = "The score could not be saved. Try again in a moment."; }
+  $("btn-save").disabled = false;
+});
+function enter() { document.documentElement.classList.remove("playing"); setHell(false); cancelAnimationFrame(raf); if (st.mode === "run") st.mode = "ready"; document.documentElement.classList.add("entered"); store.set("allllleria-entered", "1"); route(); }
+function openGate() { setHell(false); reset(); unlock(); $("gate-status").textContent = best ? "Beat your best of " + best + "." : "Score " + NEED + " or more to join the leaderboard.";
+  $("save-note").textContent = "Press space or tap to jump over the defenders."; $("btn-enter").textContent = "Back to the website"; $("score-form").hidden = true; $("btn-retry").hidden = true;
+  document.documentElement.classList.remove("entered"); fit(); }
+$("btn-enter").addEventListener("click", enter);
+$("btn-play").addEventListener("click", openGate);
+
+/* ---------- Giveaway (test: nothing is sent) ---------- */
+let blobUrl = null;
+$("foto").addEventListener("change", () => { const f = $("foto").files[0], p = $("preview"); if (blobUrl) URL.revokeObjectURL(blobUrl);
+  if (f && f.type.startsWith("image/")) { blobUrl = URL.createObjectURL(f); p.src = blobUrl; p.hidden = false; } else { p.hidden = true; } });
+$("raffle").addEventListener("submit", e => { e.preventDefault(); const msg = $("raffle-msg"), ig = $("ig").value.trim().replace(/^@/, "");
+  if (!$("foto").files[0]) { msg.textContent = "The photo is missing: choose one."; return; }
+  if (!/^[A-Za-z0-9._]{1,30}$/.test(ig)) { msg.textContent = "Check your Instagram name: letters, numbers, dots and underscores only."; return; }
+  if (!$("consenso").checked) { msg.textContent = "To enter, tick the box that allows the repost."; return; }
+  msg.textContent = "All good, @" + ig + ". Entries are not open yet, so your photo was not sent. Follow @allllleria on Instagram to know when they start."; });
+
+/* ---------- The Ls ---------- */
+let elle = 5;
+function drawElle() { const b = $("elle"); b.textContent = ""; b.append("A"); for (let i = 0; i < elle; i++) b.append(el("span", null, "l")); b.append("eria"); }
+$("elle").addEventListener("click", () => { elle = elle >= 12 ? 5 : elle + 1; drawElle();
+  $("elle-note").textContent = elle === 5 ? "Five Ls. That is the right number." : "Ls counted: " + elle + ". The right number is five."; });
+drawElle();
+
+/* ---------- Pizza on tap ---------- */
+window.addEventListener("pointerdown", e => { if (e.pointerType !== "touch") return; const t = el("div", "tap"); t.style.left = e.clientX + "px"; t.style.top = e.clientY + "px"; document.body.append(t); setTimeout(() => t.remove(), 600); }, {passive:true});
+
+/* ---------- Start ---------- */
+reset(); renderScores(); initBoard();
+if (store.get("allllleria-entered") === "1") { unlock(); document.documentElement.classList.add("entered"); }
+fit(); route();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(draw);
+</script>
+</body>
+</html>
